@@ -8,7 +8,7 @@ PowerController::PowerController()
     ina219.setCalibration_16V_400mA();
 }
 
-void PowerController::setData(void)
+void PowerController::setData()
 {
     shuntVoltage = ina219.getShuntVoltage_mV();
     busVoltage = ina219.getBusVoltage_V();

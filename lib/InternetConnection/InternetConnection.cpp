@@ -12,39 +12,52 @@ HardwareSerial gsmSerial(2);
 TinyGsm modem(gsmSerial);
 Settings settings;
 
-InternetConnection::InternetConnection()
+#define DTR_PIN 3
+
+void InternetConnection::initialize()
 {
     // Set GSM module baud rate
     gsmSerial.begin(115200, SERIAL_8N1, 16, 17, false);
-    modemReady = false;
+    // pinMode(DTR_PIN, OUTPUT);
+    // digitalWrite(DTR_PIN, HIGH);
+    restartModem();
+}
 
-    if (!modem.restart())
+void InternetConnection::restartModem()
+{
+    Serial.println("Restarting modem");
+    if (!modem.init())
     {
-        Serial.println("FAILED");
+        Serial.println("Modem FAILED");
+        modemReady = false;
     }
     else
     {
-        Serial.println("Modem restart done");
+        Serial.println("Modem restart OK");
         modemReady = true;
+        Serial.println("Modem info: " + modem.getModemInfo());
     }
-
-    String modemInfo = modem.getModemInfo();
-    Serial.print("Modem info: ");
-    Serial.println(modemInfo);
 }
 
 void InternetConnection::checkIncomingCall()
 {
-    if (modem.callAnswer())
+    if (modemReady)
     {
-        Serial.println("*** CALL ***");
-        // automatically hangup long call
-        // now = millis();
-        // while (millis() < now + period)
-        // {
-        // }
-        // modem.callHangup();
-        // Serial.println("*** BYE !!! ***");
+        if (modem.callAnswer())
+        {
+            Serial.println("*** CALL ***");
+            // automatically hangup long call
+            // now = millis();
+            // while (millis() < now + period)
+            // {
+            // }
+            // modem.callHangup();
+            // Serial.println("*** BYE !!! ***");
+        }
+    }
+    else
+    {
+        restartModem();
     }
 }
 
@@ -52,17 +65,32 @@ bool InternetConnection::initializeConnection()
 {
     if (modemReady)
     {
-        Blynk.begin(settings.blynkAuth, modem, "", "", "");
+        // digitalWrite(DTR_PIN, LOW);
+        // delay(100);
+        // modem.sleepEnable(false);
+        // digitalWrite(DTR_PIN, HIGH);
+        Blynk.begin(settings.blynkAuth, modem, "internet", "", "");
         return true;
     }
-    return false;
+    else
+    {
+        Serial.println("Modem is not ready, can't start Blynk");
+        return false;
+    }
 }
 
 void InternetConnection::disconnect()
 {
-    if (modemReady && Blynk.connected())
+    if (modemReady)
     {
         Blynk.disconnect();
+        modem.gprsDisconnect();
+        //modem.sleepEnable(true);
+        Serial.println("Disconnected OK");
+    }
+    else
+    {
+        Serial.println("Disconnected failed - modem wasn't ready");
     }
 }
 

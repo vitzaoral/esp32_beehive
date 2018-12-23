@@ -14,6 +14,14 @@ void MeteoData::setData()
 {
     sensorA = dhtA.getTempAndHumidity();
     sensorB = dhtB.getTempAndHumidity();
+
+    // TODO jedna metoda na vypis..
+    Serial.print("Sensor A :");
+    Serial.print("temperature: " + String(sensorA.temperature) + "°C ");
+    Serial.println("humidity: " + String(sensorA.humidity) + "%");
+    Serial.print("Sensor B :");
+    Serial.print("temperature: " + String(sensorB.temperature) + "°C ");
+    Serial.println("humidity: " + String(sensorB.humidity) + "%");
 }
 
 bool MeteoData::dataAreValid(TempAndHumidity sensor)

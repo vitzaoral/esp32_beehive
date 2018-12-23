@@ -13,7 +13,7 @@ class PowerController
     float current_mA;
     float power_mW;
 
-    void setData(void);
+    void setData();
 };
 
 #endif

@@ -11,12 +11,15 @@
 class InternetConnection
 {
 public:
-  InternetConnection();
+  void initialize();
   bool modemReady;
   void checkIncomingCall();
   bool initializeConnection();
   void disconnect();
   void sendDataToBlynk(MeteoData, PowerController);
+
+private:
+  void restartModem();
 };
 
 #endif
