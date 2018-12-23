@@ -20,6 +20,7 @@ public:
 
 private:
   void restartModem();
+  void getSignalQualityDescription(int, int);
 };
 
 #endif

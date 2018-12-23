@@ -65,6 +65,7 @@ bool InternetConnection::initializeConnection()
 {
     if (modemReady)
     {
+        // TODO: wake up?
         // digitalWrite(DTR_PIN, LOW);
         // delay(100);
         // modem.sleepEnable(false);
@@ -85,6 +86,7 @@ void InternetConnection::disconnect()
     {
         Blynk.disconnect();
         modem.gprsDisconnect();
+        // TODO: sleep?
         //modem.sleepEnable(true);
         Serial.println("Disconnected OK");
     }
@@ -100,7 +102,8 @@ void InternetConnection::sendDataToBlynk(MeteoData meteoData, PowerController po
     if (Blynk.connected())
     {
         // signal TODO: http://m2msupport.net/m2msupport/atcsq-signal-quality/
-        Blynk.virtualWrite(V1, modem.getSignalQuality());
+        int signalQuality = modem.getSignalQuality();
+        Blynk.virtualWrite(V1, signalQuality);
 
         // battery data
         Blynk.virtualWrite(V2, modem.getBattPercent());
@@ -119,9 +122,41 @@ void InternetConnection::sendDataToBlynk(MeteoData meteoData, PowerController po
         Blynk.virtualWrite(V8, powerController.loadVoltage);
         Blynk.virtualWrite(V9, powerController.current_mA);
         Blynk.virtualWrite(V10, powerController.power_mW);
+
+        // setup signal quality decription
+        getSignalQualityDescription(V11, signalQuality);
     }
     else
     {
         Serial.println("Blynk is not connected");
     }
+}
+
+void InternetConnection::getSignalQualityDescription(int virtualPin, int quality)
+{
+    String color = "#ff0000";
+    String message = "neznámá";
+
+    if (quality < 10)
+    {
+        message = "mizivá";
+        color = "#ff0000";
+    }
+    if (quality < 15)
+    {
+        message = "dostačující";
+        color = "#cc8400";
+    }
+    if (quality < 20)
+    {
+        message = "dobrá";
+        color = "#93bd38";
+    }
+    if (quality <= 30)
+    {
+        message = "výborná";
+        color = "#008000";
+    }
+    Blynk.virtualWrite(virtualPin, message);
+    Blynk.setProperty(virtualPin, "color", color);
 }
