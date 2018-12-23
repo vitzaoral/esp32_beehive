@@ -2,13 +2,13 @@
 #define __MeteoData_H
 
 #include <Arduino.h>
-#include <DHTesp.h>
+#include <Adafruit_SHT31.h>
 
-// struct TempAndHumidity
-// {
-//     float temperature;
-//     float humidity;
-// };
+struct TempAndHumidity
+{
+    float temperature;
+    float humidity;
+};
 
 class MeteoData
 {

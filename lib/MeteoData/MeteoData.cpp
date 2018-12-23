@@ -1,19 +1,36 @@
 #include "MeteoData.h"
 
-// DHT22 sensors
-DHTesp dhtA;
-DHTesp dhtB;
+// SHT3X sensors
+Adafruit_SHT31 sht31 = Adafruit_SHT31();
+
+#define SENSOR_A_PIN 18
+#define SENSOR_B_PIN 19
 
 MeteoData::MeteoData()
 {
-    dhtA.setup(18, DHTesp::DHT22);
-    dhtB.setup(19, DHTesp::DHT22);
+    // one of the sensors is read on the address 0x44, others are set to the address 0x45 etc.
+    pinMode(SENSOR_A_PIN, OUTPUT);
+    pinMode(SENSOR_B_PIN, OUTPUT);
+    digitalWrite(SENSOR_A_PIN, LOW);  // 0x44
+    digitalWrite(SENSOR_B_PIN, HIGH); // 0x45
+
+    if (!sht31.begin(0x44))
+    {
+        Serial.println("Could not find a valid SHT31X sensor on oaddress 0x44!");
+    }
 }
 
 void MeteoData::setData()
 {
-    sensorA = dhtA.getTempAndHumidity();
-    sensorB = dhtB.getTempAndHumidity();
+    digitalWrite(SENSOR_A_PIN, LOW); // 0x44
+    sensorA.temperature = sht31.readTemperature();
+    sensorA.humidity = sht31.readHumidity();
+    digitalWrite(SENSOR_A_PIN, HIGH); // 0x45
+
+    digitalWrite(SENSOR_B_PIN, LOW); // 0x44
+    sensorB.temperature = sht31.readTemperature();
+    sensorB.humidity = sht31.readHumidity();
+    digitalWrite(SENSOR_B_PIN, HIGH); // 0x45
 
     // TODO jedna metoda na vypis..
     Serial.print("Sensor A :");

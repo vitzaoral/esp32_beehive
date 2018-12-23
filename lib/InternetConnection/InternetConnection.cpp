@@ -18,6 +18,7 @@ void InternetConnection::initialize()
 {
     // Set GSM module baud rate
     gsmSerial.begin(115200, SERIAL_8N1, 16, 17, false);
+    // TODO: sleep/wake upp https://www.raviyp.com/embedded/223-sim900-sim800-sleep-mode-at-commands
     // pinMode(DTR_PIN, OUTPUT);
     // digitalWrite(DTR_PIN, HIGH);
     restartModem();
