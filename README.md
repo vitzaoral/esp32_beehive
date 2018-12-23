@@ -20,7 +20,8 @@ struct Settings
 * TODO
 
 ### Schema:
-![Schema](https://github.com/vitzaoral/metheo-station/blob/master/schema/meteo_schema.jpg)
+TODO
+![Schema](https://github.com/vitzaoral/esp32_beehive/blob/master/schema/schema.png)
 
 ### PCB circuit:
 * TODO
