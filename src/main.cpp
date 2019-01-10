@@ -8,8 +8,8 @@ PowerController powerController;
 
 void sendDataToInternet();
 void checkIncomingCall();
-Ticker timerSendDataToInternet(sendDataToInternet, 300000);
-Ticker timerCheckIncomingCall(checkIncomingCall, 2000);
+Ticker timerSendDataToInternet(sendDataToInternet, 300000); // 5 min
+Ticker timerCheckIncomingCall(checkIncomingCall, 2000); // 2 sec
 
 void setup()
 {
@@ -19,7 +19,9 @@ void setup()
   timerSendDataToInternet.start();
   timerCheckIncomingCall.start();
 
-  Serial.println("Setup done");
+  Serial.println("Setup done, send first data");
+  sendDataToInternet();
+  Serial.println("First data sended, start loop");
 }
 
 void loop()

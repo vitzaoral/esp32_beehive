@@ -12,7 +12,21 @@ HardwareSerial gsmSerial(2);
 TinyGsm modem(gsmSerial);
 Settings settings;
 
+// TODO: PIN for sleep/wake modem..unused - delete?
 #define DTR_PIN 3
+#define LED_BUILTIN 2
+
+// Synchronize settings from Blynk server with device when internet is connected
+BLYNK_CONNECTED()
+{
+    Blynk.syncAll();
+}
+
+// TODO: just for test...
+BLYNK_WRITE(V0)
+{
+    param.asInt() ? digitalWrite(LED_BUILTIN, HIGH) : digitalWrite(LED_BUILTIN, LOW);
+}
 
 void InternetConnection::initialize()
 {
@@ -21,6 +35,7 @@ void InternetConnection::initialize()
     // TODO: sleep/wake upp https://www.raviyp.com/embedded/223-sim900-sim800-sleep-mode-at-commands
     // pinMode(DTR_PIN, OUTPUT);
     // digitalWrite(DTR_PIN, HIGH);
+    pinMode(LED_BUILTIN, OUTPUT);
     restartModem();
 }
 

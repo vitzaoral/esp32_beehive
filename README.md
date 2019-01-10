@@ -23,6 +23,12 @@ struct Settings
 TODO
 ![Schema](https://github.com/vitzaoral/esp32_beehive/blob/master/schema/schema.png)
 
+### Powering:
+3v3 regulator - https://randomnerdtutorials.com/esp8266-voltage-regulator-lipo-and-li-ion-batteries/
+
+### GMS antenna interferes with I2C bus communication:
+TODO - https://electronics.stackexchange.com/questions/36906/radio-interferes-with-i2c-bus-communication
+
 ### PCB circuit:
 * TODO
 
