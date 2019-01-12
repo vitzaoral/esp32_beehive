@@ -1,5 +1,5 @@
 # esp32_beehive
-Beehive online monitoring based on the ESP32, SIM800L and others sensors.
+Beehives online monitoring based on the ESP32, SIM800L and others sensors.
 
 > To build a project, you need to download all the necessary libraries and create the *settings.cpp* file in the *src* folder:
 ```c++
