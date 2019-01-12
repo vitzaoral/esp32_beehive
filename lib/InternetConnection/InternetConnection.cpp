@@ -14,7 +14,6 @@ Settings settings;
 
 // TODO: PIN for sleep/wake modem..unused - delete?
 #define DTR_PIN 3
-#define LED_BUILTIN 2
 
 // Synchronize settings from Blynk server with device when internet is connected
 BLYNK_CONNECTED()
@@ -22,10 +21,15 @@ BLYNK_CONNECTED()
     Blynk.syncAll();
 }
 
-// TODO: just for test...
+// Restart ESP
 BLYNK_WRITE(V0)
 {
-    param.asInt() ? digitalWrite(LED_BUILTIN, HIGH) : digitalWrite(LED_BUILTIN, LOW);
+    if (param.asInt())
+    {
+        Blynk.virtualWrite(V0, false);
+        Serial.println("Restarting, bye..");
+        ESP.restart();
+    }
 }
 
 void InternetConnection::initialize()
@@ -35,7 +39,6 @@ void InternetConnection::initialize()
     // TODO: sleep/wake upp https://www.raviyp.com/embedded/223-sim900-sim800-sleep-mode-at-commands
     // pinMode(DTR_PIN, OUTPUT);
     // digitalWrite(DTR_PIN, HIGH);
-    pinMode(LED_BUILTIN, OUTPUT);
     restartModem();
 }
 
@@ -61,14 +64,7 @@ void InternetConnection::checkIncomingCall()
     {
         if (modem.callAnswer())
         {
-            Serial.println("*** CALL ***");
-            // automatically hangup long call
-            // now = millis();
-            // while (millis() < now + period)
-            // {
-            // }
-            // modem.callHangup();
-            // Serial.println("*** BYE !!! ***");
+            Serial.println("*** INCOMING CALL ***");
         }
     }
     else
@@ -117,7 +113,6 @@ void InternetConnection::sendDataToBlynk(MeteoData meteoData, PowerController po
     // create data to send to Blynk
     if (Blynk.connected())
     {
-        // signal TODO: http://m2msupport.net/m2msupport/atcsq-signal-quality/
         int signalQuality = modem.getSignalQuality();
         Blynk.virtualWrite(V1, signalQuality);
 
@@ -148,6 +143,7 @@ void InternetConnection::sendDataToBlynk(MeteoData meteoData, PowerController po
     }
 }
 
+// Signal quality description http://m2msupport.net/m2msupport/atcsq-signal-quality/
 void InternetConnection::getSignalQualityDescription(int virtualPin, int quality)
 {
     String color = "#ff0000";
