@@ -7,6 +7,7 @@
 #include <TinyGsmClient.h>
 #include <MeteoData.h>
 #include <PowerController.h>
+#include <GyroscopeController.h>
 
 class InternetConnection
 {
@@ -16,7 +17,7 @@ public:
   void checkIncomingCall();
   bool initializeConnection();
   void disconnect();
-  void sendDataToBlynk(MeteoData, PowerController);
+  void sendDataToBlynk(MeteoData, PowerController, GyroscopeController);
 
 private:
   void restartModem();

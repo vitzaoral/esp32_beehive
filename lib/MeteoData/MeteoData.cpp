@@ -3,16 +3,15 @@
 // SHT3X sensors
 Adafruit_SHT31 sht31 = Adafruit_SHT31();
 
-#define SENSOR_A_PIN 18
-#define SENSOR_B_PIN 19
-
 MeteoData::MeteoData()
 {
     // one of the sensors is read on the address 0x44, others are set to the address 0x45 etc.
     pinMode(SENSOR_A_PIN, OUTPUT);
     pinMode(SENSOR_B_PIN, OUTPUT);
+    //pinMode(SENSOR_C_PIN, OUTPUT);
     digitalWrite(SENSOR_A_PIN, LOW);  // 0x44
     digitalWrite(SENSOR_B_PIN, HIGH); // 0x45
+    //digitalWrite(SENSOR_C_PIN, HIGH); // 0x45
 
     if (!sht31.begin(0x44))
     {
@@ -32,6 +31,8 @@ void MeteoData::setData()
     sensorB.humidity = sht31.readHumidity();
     digitalWrite(SENSOR_B_PIN, HIGH); // 0x45
 
+    // TODO sensor C
+
     // TODO jedna metoda na vypis..
     Serial.print("Sensor A :");
     Serial.print("temperature: " + String(sensorA.temperature) + "°C ");
@@ -39,6 +40,7 @@ void MeteoData::setData()
     Serial.print("Sensor B :");
     Serial.print("temperature: " + String(sensorB.temperature) + "°C ");
     Serial.println("humidity: " + String(sensorB.humidity) + "%");
+    // TODO sensor C...
 }
 
 bool MeteoData::dataAreValid(TempAndHumidity sensor)

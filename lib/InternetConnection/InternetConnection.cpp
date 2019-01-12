@@ -110,7 +110,7 @@ void InternetConnection::disconnect()
     }
 }
 
-void InternetConnection::sendDataToBlynk(MeteoData meteoData, PowerController powerController)
+void InternetConnection::sendDataToBlynk(MeteoData meteoData, PowerController powerController, GyroscopeController gyroscopeController)
 {
     // create data to send to Blynk
     if (Blynk.connected())
@@ -138,6 +138,15 @@ void InternetConnection::sendDataToBlynk(MeteoData meteoData, PowerController po
 
         // setup signal quality decription
         getSignalQualityDescription(V11, signalQuality);
+
+        // TODO meteo data C
+        // Blynk.virtualWrite(V12, meteoData.sensorC.humidity);
+        // Blynk.virtualWrite(V13, meteoData.sensorC.temperature);
+
+        // gyroscope data
+        Blynk.virtualWrite(V14, gyroscopeController.sensorA.orientation);
+        Blynk.virtualWrite(V15, gyroscopeController.sensorB.orientation);
+        Blynk.virtualWrite(V16, gyroscopeController.sensorC.orientation);
     }
     else
     {
