@@ -9,6 +9,8 @@
 // Hardware Serial - UART2
 HardwareSerial gsmSerial(2);
 
+// TODO: OTA over SIM800L https://github.com/vshymanskyy/TinyGSM/issues/133#issuecomment-372327106
+
 TinyGsm modem(gsmSerial);
 Settings settings;
 
