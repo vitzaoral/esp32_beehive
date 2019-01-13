@@ -6,6 +6,7 @@
     "files.associations": {
         "array": "cpp",
         "initializer_list": "cpp",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "system_error": "cpp"
     }
 }

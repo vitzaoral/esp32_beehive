@@ -8,6 +8,7 @@
 #include <MeteoData.h>
 #include <PowerController.h>
 #include <GyroscopeController.h>
+#include <MagneticLockController.h>
 
 class InternetConnection
 {
@@ -17,7 +18,7 @@ public:
   void checkIncomingCall();
   bool initializeConnection();
   void disconnect();
-  void sendDataToBlynk(MeteoData, PowerController, GyroscopeController);
+  void sendDataToBlynk(MeteoData, PowerController, GyroscopeController, MagneticLockController);
 
 private:
   void restartModem();

@@ -17,6 +17,9 @@ Settings settings;
 // TODO: PIN for sleep/wake modem..unused - delete?
 #define DTR_PIN 3
 
+#define SDA 21
+#define SCL 22
+
 // Synchronize settings from Blynk server with device when internet is connected
 BLYNK_CONNECTED()
 {
@@ -29,6 +32,36 @@ BLYNK_WRITE(V0)
     if (param.asInt())
     {
         Blynk.virtualWrite(V0, false);
+
+        // TODO: refactor, odstranit? https://github.com/espressif/arduino-esp32/issues/1563#issuecomment-401560601
+        Serial.println("Check I2C");
+        if (!digitalRead(SDA) || !digitalRead(SCL))
+        { // bus in busy state
+            log_w("invalid state sda=%d, scl=%d\n", digitalRead(SDA), digitalRead(SCL));
+            Serial.print("invalid state SDA: ");
+            Serial.println(digitalRead(SDA));
+            Serial.print("invalid state SCL: ");
+            Serial.println(digitalRead(SCL));
+            digitalWrite(SDA, HIGH);
+            digitalWrite(SCL, HIGH);
+            delayMicroseconds(5);
+            digitalWrite(SDA, HIGH);
+            for (uint8_t a = 0; a < 9; a++)
+            {
+                delayMicroseconds(5);
+                digitalWrite(SCL, LOW);
+                delayMicroseconds(5);
+                digitalWrite(SCL, HIGH);
+                if (digitalRead(SDA))
+                { // bus recovered, all done. resync'd with slave
+                    break;
+                }
+            }
+        }
+        else
+        {
+            Serial.println("I2C OK");
+        }
         Serial.println("Restarting, bye..");
         ESP.restart();
     }
@@ -110,7 +143,11 @@ void InternetConnection::disconnect()
     }
 }
 
-void InternetConnection::sendDataToBlynk(MeteoData meteoData, PowerController powerController, GyroscopeController gyroscopeController)
+void InternetConnection::sendDataToBlynk(
+    MeteoData meteoData,
+    PowerController powerController,
+    GyroscopeController gyroscopeController,
+    MagneticLockController magneticLockController)
 {
     // create data to send to Blynk
     if (Blynk.connected())
@@ -147,6 +184,30 @@ void InternetConnection::sendDataToBlynk(MeteoData meteoData, PowerController po
         Blynk.virtualWrite(V14, gyroscopeController.sensorA.orientation);
         Blynk.virtualWrite(V15, gyroscopeController.sensorB.orientation);
         Blynk.virtualWrite(V16, gyroscopeController.sensorC.orientation);
+
+        // I2C status - SDA
+        // TODO: refactor..barvy kod atd...
+        if (!digitalRead(SDA))
+        {
+            Blynk.virtualWrite(V17, "SDA error");
+        }
+        else
+        {
+            Blynk.virtualWrite(V17, "SDA OK");
+        }
+        if (!digitalRead(SCL))
+        {
+            Blynk.virtualWrite(V18, "SCL error");
+        }
+        else
+        {
+            Blynk.virtualWrite(V18, "SCL OK");
+        }
+
+        // magnetic locks data
+        Blynk.virtualWrite(V19, magneticLockController.sensorA.status);
+        Blynk.virtualWrite(V20, magneticLockController.sensorB.status);
+        Blynk.virtualWrite(V21, magneticLockController.sensorC.status);
     }
     else
     {
