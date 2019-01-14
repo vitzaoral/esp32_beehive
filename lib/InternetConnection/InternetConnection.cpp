@@ -208,6 +208,11 @@ void InternetConnection::sendDataToBlynk(
         Blynk.virtualWrite(V19, magneticLockController.sensorA.status);
         Blynk.virtualWrite(V20, magneticLockController.sensorB.status);
         Blynk.virtualWrite(V21, magneticLockController.sensorC.status);
+
+        // outdoor temperature sensor
+        Blynk.virtualWrite(V22, meteoData.sensorOutdoor.humidity);
+        Blynk.virtualWrite(V23, meteoData.sensorOutdoor.temperature);
+        Blynk.virtualWrite(V24, meteoData.sensorOutdoor.pressure);
     }
     else
     {

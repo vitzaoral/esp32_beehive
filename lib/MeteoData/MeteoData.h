@@ -2,7 +2,9 @@
 #define __MeteoData_H
 
 #include <Arduino.h>
+#include <Adafruit_Sensor.h>
 #include <Adafruit_SHT31.h>
+#include <Adafruit_BME280.h>
 
 #define SENSOR_A_PIN 18
 #define SENSOR_B_PIN 19
@@ -12,17 +14,22 @@ struct TempAndHumidity
 {
     float temperature;
     float humidity;
+    float pressure;
 };
 
 class MeteoData
 {
   public:
-    MeteoData();
     TempAndHumidity sensorA;
     TempAndHumidity sensorB;
-
+    TempAndHumidity sensorC;
+    TempAndHumidity sensorOutdoor;
+    MeteoData();
     void setData();
-    bool dataAreValid(TempAndHumidity);
+
+  private:
+    void setSensorData(TempAndHumidity *data);
+    void printSensorData(TempAndHumidity *data);
 };
 
 #endif

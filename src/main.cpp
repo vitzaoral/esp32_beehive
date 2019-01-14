@@ -20,7 +20,6 @@ Ticker timerMagneticLockAlarm(checkMagneticLockAlarm, 1800); // 1.8 sec
 // TODO: gyroscope alarm
 // TODO: magnetic lock alarm
 // TODO: buzzer siren
-// TODO: outdoor temperature/humidity sensor (bme280?) viz. meteoStation
 // TODO: mic switchinng
 
 void setup()
