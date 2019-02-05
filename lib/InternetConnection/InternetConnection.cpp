@@ -1,5 +1,5 @@
 #include "InternetConnection.h"
-#include <BlynkSimpleSIM800.h>
+#include <BlynkSimpleTinyGSM.h>
 #include "../../src/settings.cpp"
 
 // SIM800L -> ESP32 wiring to UART2
@@ -231,17 +231,17 @@ void InternetConnection::getSignalQualityDescription(int virtualPin, int quality
         message = "mizivá";
         color = "#ff0000";
     }
-    if (quality < 15)
+    else if (quality < 15)
     {
         message = "dostačující";
         color = "#cc8400";
     }
-    if (quality < 20)
+    else if (quality < 20)
     {
         message = "dobrá";
         color = "#93bd38";
     }
-    if (quality <= 30)
+    else if (quality <= 30)
     {
         message = "výborná";
         color = "#008000";

@@ -32,6 +32,8 @@ void setup()
   timerGyroscopeAlarm.start();
   timerMagneticLockAlarm.start();
 
+  meteoData.initializeSensors();
+
   // set first data for gyroscope and magnetic locks, other in timers..
   // gyroscopeController.setData();
   // magneticLockController.setData();

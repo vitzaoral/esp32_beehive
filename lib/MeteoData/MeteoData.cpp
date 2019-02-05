@@ -15,20 +15,37 @@ MeteoData::MeteoData()
     digitalWrite(SENSOR_A_PIN, LOW);  // 0x44
     digitalWrite(SENSOR_B_PIN, HIGH); // 0x45
     //digitalWrite(SENSOR_C_PIN, HIGH); // 0x45
+}
 
+void MeteoData::initializeSensors()
+{
     if (!sht31.begin(0x44))
     {
         Serial.println("Could not find a valid SHT31X sensor on oaddress 0x44!");
+    }
+    else
+    {
+        Serial.println("Inner SHT31X OK");
     }
 
     if (!bme.begin(0x76))
     {
         Serial.println("Could not find a valid BME280 sensor on address 0x76!");
     }
+    else
+    {
+        Serial.println("Outdoor BME280 OK");
+    }
 }
 
 void MeteoData::setData()
 {
+    Serial.print("Outdoor sensor: ");
+    sensorOutdoor.temperature = bme.readTemperature();
+    sensorOutdoor.humidity = bme.readHumidity();
+    sensorOutdoor.pressure = bme.readPressure() / 100.0;
+    MeteoData::printSensorData(&sensorOutdoor);
+
     digitalWrite(SENSOR_A_PIN, LOW); // 0x44
     Serial.print("Sensor A :");
     MeteoData::setSensorData(&sensorA);
@@ -44,12 +61,6 @@ void MeteoData::setData()
     // Serial.print("Sensor C :");
     // MeteoData::setSensorData(&sensorC);
     // digitalWrite(SENSOR_C_PIN, HIGH); // 0x45
-
-    Serial.print("Outdoor sensor :");
-    sensorOutdoor.temperature = bme.readTemperature();
-    sensorOutdoor.humidity = bme.readHumidity();
-    sensorOutdoor.pressure = bme.readPressure() / 100.0;
-    MeteoData::printSensorData(&sensorOutdoor);
 }
 
 void MeteoData::setSensorData(TempAndHumidity *data)

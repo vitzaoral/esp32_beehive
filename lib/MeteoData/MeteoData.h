@@ -25,6 +25,7 @@ class MeteoData
     TempAndHumidity sensorC;
     TempAndHumidity sensorOutdoor;
     MeteoData();
+    void initializeSensors();
     void setData();
 
   private:
