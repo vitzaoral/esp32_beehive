@@ -2,7 +2,6 @@
 
 MagneticLockController::MagneticLockController()
 {
-    // one of the sensors is read on the address 0x1C, others are set to the address 0x1D etc.
     pinMode(LOCK_A_PIN, INPUT);
     pinMode(LOCK_B_PIN, INPUT);
     pinMode(LOCK_C_PIN, INPUT);

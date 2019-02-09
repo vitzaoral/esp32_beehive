@@ -77,7 +77,7 @@ void sendDataToInternet()
 
 void checkGyroscopeAlarm()
 {
-  //gyroscopeController.setData();
+  gyroscopeController.setData();
   // TODO: alarm...connect to GPRS, send notification, run buzzer sound etc..
 }
 

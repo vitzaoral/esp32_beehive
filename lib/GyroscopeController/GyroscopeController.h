@@ -24,6 +24,7 @@ class GyroscopeController
     GyroscopeData sensorB;
     GyroscopeData sensorC;
     void setData();
+    void initializeSensors();
 
   private:
     String setOrientation();

@@ -176,9 +176,9 @@ void InternetConnection::sendDataToBlynk(
         // setup signal quality decription
         getSignalQualityDescription(V11, signalQuality);
 
-        // TODO meteo data C
-        // Blynk.virtualWrite(V12, meteoData.sensorC.humidity);
-        // Blynk.virtualWrite(V13, meteoData.sensorC.temperature);
+        // meteo data C
+        Blynk.virtualWrite(V12, meteoData.sensorC.humidity);
+        Blynk.virtualWrite(V13, meteoData.sensorC.temperature);
 
         // gyroscope data
         Blynk.virtualWrite(V14, gyroscopeController.sensorA.orientation);

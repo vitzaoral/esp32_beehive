@@ -12,33 +12,47 @@ GyroscopeController::GyroscopeController()
     digitalWrite(GYROSCOPE_A_PIN, LOW);  // 0x1C
     digitalWrite(GYROSCOPE_B_PIN, HIGH); // 0x1D
     digitalWrite(GYROSCOPE_C_PIN, HIGH); // 0x1D
+}
 
+void GyroscopeController::initializeSensors()
+{
     accel.init();
     if (!accel.available())
     {
         Serial.println("Could not find a valid Gyroscope sensor on oaddress 0x1C!");
+    }
+    else
+    {
+        Serial.println("Gyroscope sensors OK");
     }
 }
 
 void GyroscopeController::setData()
 {
     digitalWrite(GYROSCOPE_A_PIN, LOW);
+    accel.init();
+    delay(100);
     Serial.print("Gyroscope A: ");
     setSensorData(&sensorA);
     printCalculatedAccels(&sensorA);
     digitalWrite(GYROSCOPE_A_PIN, HIGH);
 
     digitalWrite(GYROSCOPE_B_PIN, LOW);
+    accel.init();
+    delay(100);
     Serial.print("Gyroscope B: ");
     setSensorData(&sensorB);
     printCalculatedAccels(&sensorB);
     digitalWrite(GYROSCOPE_B_PIN, HIGH);
 
     digitalWrite(GYROSCOPE_C_PIN, LOW);
+    accel.init();
+    delay(100);
     Serial.print("Gyroscope C: ");
     setSensorData(&sensorC);
     printCalculatedAccels(&sensorC);
     digitalWrite(GYROSCOPE_C_PIN, HIGH);
+    Serial.println();
 }
 
 void GyroscopeController::setSensorData(GyroscopeData *data)
@@ -73,6 +87,7 @@ String GyroscopeController::setOrientation()
     case LOCKOUT:
         return "Flat";
     }
+    return "";
 }
 
 void GyroscopeController::printCalculatedAccels(GyroscopeData *data)
