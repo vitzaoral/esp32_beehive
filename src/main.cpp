@@ -78,11 +78,11 @@ void sendDataToInternet()
 void checkGyroscopeAlarm()
 {
   gyroscopeController.setData();
-  // TODO: alarm...connect to GPRS, send notification, run buzzer sound etc..
+  // TODO: alarm -> connect to GPRS, send notification, run buzzer sound etc..
 }
 
 void checkMagneticLockAlarm()
 {
-  // magneticLockController.setData();
-  // TODO: alarm...connect to GPRS, send notification, run buzzer sound etc..
+  //magneticLockController.setData();
+  // TODO: alarm -> connect to GPRS, send notification, run buzzer sound etc..
 }

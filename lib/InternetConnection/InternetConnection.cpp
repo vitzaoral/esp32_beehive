@@ -69,6 +69,11 @@ BLYNK_WRITE(V0)
 
 void InternetConnection::initialize()
 {
+    // setup microphone turn off/on pins
+    pinMode(MICROPHONE_A_PIN, OUTPUT);
+    pinMode(MICROPHONE_B_PIN, OUTPUT);
+    pinMode(MICROPHONE_C_PIN, OUTPUT);
+
     // Set GSM module baud rate
     gsmSerial.begin(115200, SERIAL_8N1, 16, 17, false);
     // TODO: sleep/wake upp https://www.raviyp.com/embedded/223-sim900-sim800-sleep-mode-at-commands
@@ -100,12 +105,36 @@ void InternetConnection::checkIncomingCall()
         if (modem.callAnswer())
         {
             Serial.println("*** INCOMING CALL ***");
+            processIncomingCall();
         }
     }
     else
     {
         restartModem();
     }
+}
+
+void InternetConnection::processIncomingCall()
+{
+    Serial.println("Microphone A on");
+    digitalWrite(MICROPHONE_A_PIN, HIGH);
+    delay(5000);
+    digitalWrite(MICROPHONE_A_PIN, LOW);
+    delay(1000);
+
+    Serial.println("Microphone B on");
+    digitalWrite(MICROPHONE_B_PIN, HIGH);
+    delay(5000);
+    digitalWrite(MICROPHONE_B_PIN, LOW);
+    delay(1000);
+
+    Serial.println("Microphone C on");
+    digitalWrite(MICROPHONE_C_PIN, HIGH);
+    delay(5000);
+    digitalWrite(MICROPHONE_C_PIN, LOW);
+
+    Serial.println("*** BYE BYE ***");
+    modem.callHangup();
 }
 
 bool InternetConnection::initializeConnection()
