@@ -1,9 +1,9 @@
 #ifndef __AlarmController_H
 #define __AlarmController_H
 
-#include <InternetConnection.h>
+#include <Arduino.h>
 
-#define BUZZER_PIN 15
+#define BUZZER_PIN 4
 
 class AlarmController
 {

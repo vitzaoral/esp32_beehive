@@ -14,6 +14,7 @@
 #include <PowerController.h>
 #include <GyroscopeController.h>
 #include <MagneticLockController.h>
+#include <AlarmController.h>
 
 class InternetConnection
 {

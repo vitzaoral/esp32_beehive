@@ -7,6 +7,7 @@ MeteoData meteoData;
 PowerController powerController;
 GyroscopeController gyroscopeController;
 MagneticLockController magneticLockController;
+AlarmController alarmController;
 
 void sendDataToInternet();
 void checkIncomingCall();
@@ -35,8 +36,8 @@ void setup()
   meteoData.initializeSensors();
 
   // set first data for gyroscope and magnetic locks, other in timers..
-  // gyroscopeController.setData();
-  // magneticLockController.setData();
+  gyroscopeController.setData();
+  magneticLockController.setData();
   Serial.println("Setup done, send first data");
   sendDataToInternet();
   Serial.println("First data sended, start loop");
@@ -83,6 +84,6 @@ void checkGyroscopeAlarm()
 
 void checkMagneticLockAlarm()
 {
-  //magneticLockController.setData();
+  magneticLockController.setData();
   // TODO: alarm -> connect to GPRS, send notification, run buzzer sound etc..
 }
