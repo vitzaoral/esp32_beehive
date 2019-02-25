@@ -2,12 +2,20 @@
 #include <InternetConnection.h>
 #include <Ticker.h>
 
+// cervenby S09 start 13.2. v 21:30 - 14.2. 23:30 - 26 hodin
+// DD0503MA start 15.2. 7:30 - 16.2. 13:45 - 30 hodin
+// 403MA start 18.2. 7:30 - 19.2. 11:45 - 28 hodin
+
+// DD0503MA bez senzoru start 20.2. 7:30 - 15:30 - 32 hodin
+
+// TODO: zkusit max. napeti pro TP4056 a na to nastavit regulator za solarem (ale bude to fungovat pro mensi napeti..?)
+
 InternetConnection connection;
 MeteoData meteoData;
 PowerController powerController;
 GyroscopeController gyroscopeController;
 MagneticLockController magneticLockController;
-AlarmController alarmController;
+SirenController SirenController;
 
 void sendDataToInternet();
 void checkIncomingCall();
@@ -79,11 +87,15 @@ void sendDataToInternet()
 void checkGyroscopeAlarm()
 {
   gyroscopeController.setData();
+
   // TODO: alarm -> connect to GPRS, send notification, run buzzer sound etc..
 }
 
 void checkMagneticLockAlarm()
 {
   magneticLockController.setData();
-  // TODO: alarm -> connect to GPRS, send notification, run buzzer sound etc..
+  if (!magneticLockController.check())
+  {
+    connection.alarmMagneticController(magneticLockController);
+  }
 }

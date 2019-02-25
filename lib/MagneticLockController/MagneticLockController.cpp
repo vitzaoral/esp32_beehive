@@ -32,3 +32,15 @@ void MagneticLockController::setSensorData(LockData *data, int pin)
         Serial.println("UNLOCKED!");
     }
 }
+
+// Check if all lockers are locked
+bool MagneticLockController::check()
+{
+    return sensorA.locked && sensorB.locked && sensorC.locked;
+}
+
+String MagneticLockController::getAlarmMessage()
+{
+    String message = "";
+    return String(sensorA.locked ? "" : "A") + String(sensorB.locked ? "" : "B") + String(sensorC.locked ? "" : "C");
+}

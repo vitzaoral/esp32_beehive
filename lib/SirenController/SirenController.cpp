@@ -1,4 +1,4 @@
-#include "AlarmController.h"
+#include "SirenController.h"
 
 // use first channel of 16 channels (started from zero)
 #define LEDC_CHANNEL_0 0
@@ -9,13 +9,13 @@
 // use 5000 Hz as a LEDC base frequency
 #define LEDC_BASE_FREQ 5000
 
-AlarmController::AlarmController()
+SirenController::SirenController()
 {
     ledcSetup(LEDC_CHANNEL_0, LEDC_BASE_FREQ, LEDC_TIMER_13_BIT);
     ledcAttachPin(BUZZER_PIN, LEDC_CHANNEL_0);
 }
 
-void AlarmController::alarmOn()
+void SirenController::sirenOn()
 {
     float sinVal;
     int toneVal;
@@ -31,7 +31,7 @@ void AlarmController::alarmOn()
     }
 }
 
-void AlarmController::alarmOff()
+void SirenController::sirenOff()
 {
     ledcWriteTone(LEDC_CHANNEL_0, 0);
 }

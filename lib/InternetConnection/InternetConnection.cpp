@@ -67,6 +67,11 @@ BLYNK_WRITE(V0)
     }
 }
 
+// Turn on/off alarm (push notifications etc).
+BLYNK_WRITE(V30)
+{
+}
+
 void InternetConnection::initialize()
 {
     // setup microphone turn off/on pins
@@ -234,9 +239,7 @@ void InternetConnection::sendDataToBlynk(
         }
 
         // magnetic locks data
-        Blynk.virtualWrite(V19, magneticLockController.sensorA.status);
-        Blynk.virtualWrite(V20, magneticLockController.sensorB.status);
-        Blynk.virtualWrite(V21, magneticLockController.sensorC.status);
+        setMagneticLockControllerDataToBlynk(magneticLockController);
 
         // outdoor temperature sensor
         Blynk.virtualWrite(V22, meteoData.sensorOutdoor.humidity);
@@ -247,6 +250,13 @@ void InternetConnection::sendDataToBlynk(
     {
         Serial.println("Blynk is not connected");
     }
+}
+
+void InternetConnection::setMagneticLockControllerDataToBlynk(MagneticLockController magneticLockController)
+{
+    Blynk.virtualWrite(V19, magneticLockController.sensorA.status);
+    Blynk.virtualWrite(V20, magneticLockController.sensorB.status);
+    Blynk.virtualWrite(V21, magneticLockController.sensorC.status);
 }
 
 // Signal quality description http://m2msupport.net/m2msupport/atcsq-signal-quality/
@@ -277,4 +287,30 @@ void InternetConnection::getSignalQualityDescription(int virtualPin, int quality
     }
     Blynk.virtualWrite(virtualPin, message);
     Blynk.setProperty(virtualPin, "color", color);
+}
+
+////////////////////
+/// ALARM SECTION
+////////////////////
+
+void InternetConnection::alarmMagneticController(MagneticLockController magneticLockController)
+{
+    Serial.println("\n!!! Magnetic alarm !!!\n");
+    if (!Blynk.connected())
+    {
+        initializeConnection();
+    }
+
+    if (Blynk.connected())
+    {
+        setMagneticLockControllerDataToBlynk(magneticLockController);
+        Blynk.notify("! ALARM ! Magnetický zámek je otevřen: " + magneticLockController.getAlarmMessage());
+    }
+    else
+    {
+        // TODO: No Blynk connection, try send SMS or call?
+        // res = modem.sendSMS(SMS_TARGET, String("Hello from ") + imei);
+        // res = modem.callNumber(CALL_TARGET);
+        Serial.println("Can't connected to Blynk");
+    }
 }

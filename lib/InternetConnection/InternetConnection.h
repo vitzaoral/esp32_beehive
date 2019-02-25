@@ -14,7 +14,7 @@
 #include <PowerController.h>
 #include <GyroscopeController.h>
 #include <MagneticLockController.h>
-#include <AlarmController.h>
+#include <SirenController.h>
 
 class InternetConnection
 {
@@ -25,9 +25,11 @@ public:
   bool initializeConnection();
   void disconnect();
   void sendDataToBlynk(MeteoData, PowerController, GyroscopeController, MagneticLockController);
+  void alarmMagneticController(MagneticLockController);
 
 private:
   void restartModem();
+  void setMagneticLockControllerDataToBlynk(MagneticLockController);
   void getSignalQualityDescription(int, int);
   void processIncomingCall();
 };
