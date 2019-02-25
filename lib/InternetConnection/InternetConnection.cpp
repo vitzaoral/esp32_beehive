@@ -14,6 +14,9 @@ HardwareSerial gsmSerial(2);
 TinyGsm modem(gsmSerial);
 Settings settings;
 
+// alarm notifications are enabled
+bool alarmEnabled = true;
+
 // TODO: PIN for sleep/wake modem..unused - delete?
 #define DTR_PIN 3
 
@@ -70,6 +73,8 @@ BLYNK_WRITE(V0)
 // Turn on/off alarm (push notifications etc).
 BLYNK_WRITE(V30)
 {
+    alarmEnabled = param.asInt();
+    Serial.println("Alarm was " + String(alarmEnabled ? "enabled" : "disabled"));
 }
 
 void InternetConnection::initialize()
@@ -144,6 +149,7 @@ void InternetConnection::processIncomingCall()
 
 bool InternetConnection::initializeConnection()
 {
+    Serial.println("Initialize Blynk connection");
     if (modemReady)
     {
         // TODO: wake up?
@@ -255,8 +261,13 @@ void InternetConnection::sendDataToBlynk(
 void InternetConnection::setMagneticLockControllerDataToBlynk(MagneticLockController magneticLockController)
 {
     Blynk.virtualWrite(V19, magneticLockController.sensorA.status);
+    setAlarmCollor(V19, magneticLockController.sensorA.locked);
+
     Blynk.virtualWrite(V20, magneticLockController.sensorB.status);
+    setAlarmCollor(V20, magneticLockController.sensorB.locked);
+
     Blynk.virtualWrite(V21, magneticLockController.sensorC.status);
+    setAlarmCollor(V21, magneticLockController.sensorC.locked);
 }
 
 // Signal quality description http://m2msupport.net/m2msupport/atcsq-signal-quality/
@@ -293,9 +304,19 @@ void InternetConnection::getSignalQualityDescription(int virtualPin, int quality
 /// ALARM SECTION
 ////////////////////
 
+void InternetConnection::setAlarmCollor(int virtualPin, bool isOk)
+{
+    Blynk.setProperty(virtualPin, "color", String(isOk ? "#008000" : "ff0000"));
+}
+
 void InternetConnection::alarmMagneticController(MagneticLockController magneticLockController)
 {
     Serial.println("\n!!! Magnetic alarm !!!\n");
+    if (!alarmEnabled)
+    {
+        return;
+    }
+
     if (!Blynk.connected())
     {
         initializeConnection();

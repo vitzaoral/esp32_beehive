@@ -32,6 +32,7 @@ private:
   void setMagneticLockControllerDataToBlynk(MagneticLockController);
   void getSignalQualityDescription(int, int);
   void processIncomingCall();
+  void setAlarmCollor(int, bool);
 };
 
 #endif
