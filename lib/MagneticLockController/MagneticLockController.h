@@ -21,7 +21,7 @@ class MagneticLockController
     LockData sensorB;
     LockData sensorC;
     void setData();
-    bool check();
+    bool isOk();
     String getAlarmMessage();
 
   private:

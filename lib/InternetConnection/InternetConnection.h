@@ -21,11 +21,14 @@ class InternetConnection
 public:
   void initialize();
   bool modemReady;
+  bool isAlarm;
   void checkIncomingCall();
   bool initializeConnection();
   void disconnect();
   void sendDataToBlynk(MeteoData, PowerController, GyroscopeController, MagneticLockController);
   void alarmMagneticController(MagneticLockController);
+  void blynkRunIfAlarm();
+  void setMagneticLockControllerDataToBlynkIfAlarm(MagneticLockController);
 
 private:
   void restartModem();

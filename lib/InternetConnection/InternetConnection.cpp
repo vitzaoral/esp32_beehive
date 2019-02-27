@@ -15,7 +15,7 @@ TinyGsm modem(gsmSerial);
 Settings settings;
 
 // alarm notifications are enabled
-bool alarmEnabled = true;
+bool alarmEnabledNotifications = true;
 
 // TODO: PIN for sleep/wake modem..unused - delete?
 #define DTR_PIN 3
@@ -70,11 +70,11 @@ BLYNK_WRITE(V0)
     }
 }
 
-// Turn on/off alarm (push notifications etc).
+// Turn on/off alarm notifications
 BLYNK_WRITE(V30)
 {
-    alarmEnabled = param.asInt();
-    Serial.println("Alarm was " + String(alarmEnabled ? "enabled" : "disabled"));
+    alarmEnabledNotifications = param.asInt();
+    Serial.println("Alarm notifications was " + String(alarmEnabledNotifications ? "enabled" : "disabled"));
 }
 
 void InternetConnection::initialize()
@@ -90,6 +90,9 @@ void InternetConnection::initialize()
     // pinMode(DTR_PIN, OUTPUT);
     // digitalWrite(DTR_PIN, HIGH);
     restartModem();
+
+    // true if is actual alarm - run Blynk.run
+    isAlarm = false;
 }
 
 void InternetConnection::restartModem()
@@ -304,18 +307,31 @@ void InternetConnection::getSignalQualityDescription(int virtualPin, int quality
 /// ALARM SECTION
 ////////////////////
 
+void InternetConnection::blynkRunIfAlarm()
+{
+    if (isAlarm)
+    {
+        Blynk.run();
+    }
+}
+
 void InternetConnection::setAlarmCollor(int virtualPin, bool isOk)
 {
     Blynk.setProperty(virtualPin, "color", String(isOk ? "#008000" : "ff0000"));
 }
 
+void InternetConnection::setMagneticLockControllerDataToBlynkIfAlarm(MagneticLockController magneticLockController)
+{
+    if (isAlarm)
+    {
+        setMagneticLockControllerDataToBlynk(magneticLockController);
+    }
+}
+
 void InternetConnection::alarmMagneticController(MagneticLockController magneticLockController)
 {
+    // TODO: mozna pridat moznost alarm uplne vypnout - dalsi tlacitko vedle notifikaci
     Serial.println("\n!!! Magnetic alarm !!!\n");
-    if (!alarmEnabled)
-    {
-        return;
-    }
 
     if (!Blynk.connected())
     {
@@ -325,13 +341,17 @@ void InternetConnection::alarmMagneticController(MagneticLockController magnetic
     if (Blynk.connected())
     {
         setMagneticLockControllerDataToBlynk(magneticLockController);
-        Blynk.notify("! ALARM ! Magnetický zámek je otevřen: " + magneticLockController.getAlarmMessage());
+
+        if (alarmEnabledNotifications)
+        {
+            Blynk.notify("! ALARM ! Magnetický zámek je otevřen: " + magneticLockController.getAlarmMessage());
+        }
     }
     else
     {
         // TODO: No Blynk connection, try send SMS or call?
         // res = modem.sendSMS(SMS_TARGET, String("Hello from ") + imei);
         // res = modem.callNumber(CALL_TARGET);
-        Serial.println("Can't connected to Blynk");
+        Serial.println("ALARM but can't connected to Blynk");
     }
 }

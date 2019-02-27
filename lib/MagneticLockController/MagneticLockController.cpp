@@ -34,7 +34,7 @@ void MagneticLockController::setSensorData(LockData *data, int pin)
 }
 
 // Check if all lockers are locked
-bool MagneticLockController::check()
+bool MagneticLockController::isOk()
 {
     return sensorA.locked && sensorB.locked && sensorC.locked;
 }

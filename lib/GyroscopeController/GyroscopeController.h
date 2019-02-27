@@ -23,6 +23,7 @@ class GyroscopeController
     GyroscopeData sensorA;
     GyroscopeData sensorB;
     GyroscopeData sensorC;
+    bool isOk();
     void setData();
     void initializeSensors();
 

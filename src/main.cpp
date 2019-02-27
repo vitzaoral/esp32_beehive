@@ -21,10 +21,16 @@ void sendDataToInternet();
 void checkIncomingCall();
 void checkGyroscopeAlarm();
 void checkMagneticLockAlarm();
+
 Ticker timerSendDataToInternet(sendDataToInternet, 300000);  // 5 min
-Ticker timerCheckIncomingCall(checkIncomingCall, 2000);      // 2 sec
-Ticker timerGyroscopeAlarm(checkGyroscopeAlarm, 2500);       // 2.5 sec
-Ticker timerMagneticLockAlarm(checkMagneticLockAlarm, 1800); // 1.8 sec
+Ticker timerCheckIncomingCall(checkIncomingCall, 5123);      // 5 sec
+Ticker timerGyroscopeAlarm(checkGyroscopeAlarm, 5321);       // 5 sec
+Ticker timerMagneticLockAlarm(checkMagneticLockAlarm, 4321); // 4 sec
+
+// alarm section
+void sendDataToBlynkIfAlarm();
+Ticker timerSendDataToBlynkIfAlarm(sendDataToBlynkIfAlarm, 20000); // 20 sec
+
 // TODO: sound level measuring
 // TODO: gyroscope alarm
 // TODO: magnetic lock alarm
@@ -40,6 +46,7 @@ void setup()
   timerCheckIncomingCall.start();
   timerGyroscopeAlarm.start();
   timerMagneticLockAlarm.start();
+  timerSendDataToBlynkIfAlarm.start();
 
   meteoData.initializeSensors();
 
@@ -57,6 +64,9 @@ void loop()
   timerCheckIncomingCall.update();
   timerGyroscopeAlarm.update();
   timerMagneticLockAlarm.update();
+  timerSendDataToBlynkIfAlarm.update();
+
+  connection.blynkRunIfAlarm();
 }
 
 void checkIncomingCall()
@@ -94,8 +104,24 @@ void checkGyroscopeAlarm()
 void checkMagneticLockAlarm()
 {
   magneticLockController.setData();
-  if (!magneticLockController.check())
+  if (magneticLockController.isOk())
   {
+    // update blynk data and turn alarm off
+    if (connection.isAlarm)
+    {
+      connection.setMagneticLockControllerDataToBlynkIfAlarm(magneticLockController);
+    }
+    connection.isAlarm = false;
+  }
+  else
+  {
+    connection.isAlarm = true;
     connection.alarmMagneticController(magneticLockController);
   }
+}
+
+void sendDataToBlynkIfAlarm()
+{
+  connection.setMagneticLockControllerDataToBlynkIfAlarm(magneticLockController);
+  // TODO: gyroscopes alarm same way...
 }

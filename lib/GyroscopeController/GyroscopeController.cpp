@@ -100,3 +100,10 @@ void GyroscopeController::printCalculatedAccels(GyroscopeData *data)
     Serial.print("\t");
     Serial.println(data->orientation);
 }
+
+// Check if all gyroscopes are in Flat position
+bool GyroscopeController::isOk()
+{
+    // TODO
+    return true;
+}
