@@ -10,27 +10,30 @@
 
 struct GyroscopeData
 {
-    float x;
-    float y;
-    float z;
-    String orientation;
+  float x;
+  float y;
+  float z;
+  int orientationType;
+  bool isOk;
+  String orientation;
 };
 
 class GyroscopeController
 {
-  public:
-    GyroscopeController();
-    GyroscopeData sensorA;
-    GyroscopeData sensorB;
-    GyroscopeData sensorC;
-    bool isOk();
-    void setData();
-    void initializeSensors();
+public:
+  GyroscopeController();
+  GyroscopeData sensorA;
+  GyroscopeData sensorB;
+  GyroscopeData sensorC;
+  bool isOk();
+  void setData();
+  void initializeSensors();
+  String getAlarmMessage();
 
-  private:
-    String setOrientation();
-    void setSensorData(GyroscopeData *data);
-    void printCalculatedAccels(GyroscopeData *data);
+private:
+  String setOrientation(byte);
+  void setSensorData(GyroscopeData *data);
+  void printCalculatedAccels(GyroscopeData *data);
 };
 
 #endif

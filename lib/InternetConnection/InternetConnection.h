@@ -27,12 +27,16 @@ public:
   void disconnect();
   void sendDataToBlynk(MeteoData, PowerController, GyroscopeController, MagneticLockController);
   void alarmMagneticController(MagneticLockController);
+  void alarmGyroscopeController(GyroscopeController);
   void blynkRunIfAlarm();
   void setMagneticLockControllerDataToBlynkIfAlarm(MagneticLockController);
+  void setGyroscopeControllerDataToBlynkIfAlarm(GyroscopeController);
 
 private:
   void restartModem();
   void setMagneticLockControllerDataToBlynk(MagneticLockController);
+  void setGyroscopeControllerDataToBlynk(GyroscopeController);
+  void setAlarmInfoToBlynk();
   void getSignalQualityDescription(int, int);
   void processIncomingCall();
   void setAlarmCollor(int, bool);

@@ -32,8 +32,6 @@ void sendDataToBlynkIfAlarm();
 Ticker timerSendDataToBlynkIfAlarm(sendDataToBlynkIfAlarm, 20000); // 20 sec
 
 // TODO: sound level measuring
-// TODO: gyroscope alarm
-// TODO: magnetic lock alarm
 // TODO: buzzer siren
 // TODO: mic switchinng
 
@@ -97,8 +95,20 @@ void sendDataToInternet()
 void checkGyroscopeAlarm()
 {
   gyroscopeController.setData();
-
-  // TODO: alarm -> connect to GPRS, send notification, run buzzer sound etc..
+  if (gyroscopeController.isOk())
+  {
+    // update blynk data and turn alarm off
+    if (connection.isAlarm)
+    {
+      connection.setGyroscopeControllerDataToBlynkIfAlarm(gyroscopeController);
+    }
+    connection.isAlarm = false;
+  }
+  else
+  {
+    connection.isAlarm = true;
+    connection.alarmGyroscopeController(gyroscopeController);
+  }
 }
 
 void checkMagneticLockAlarm()
@@ -123,5 +133,5 @@ void checkMagneticLockAlarm()
 void sendDataToBlynkIfAlarm()
 {
   connection.setMagneticLockControllerDataToBlynkIfAlarm(magneticLockController);
-  // TODO: gyroscopes alarm same way...
+  connection.setGyroscopeControllerDataToBlynkIfAlarm(gyroscopeController);
 }

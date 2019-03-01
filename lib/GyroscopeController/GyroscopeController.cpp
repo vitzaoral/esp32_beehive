@@ -60,10 +60,13 @@ void GyroscopeController::setSensorData(GyroscopeData *data)
     if (accel.available())
     {
         accel.read();
+        byte orientation = accel.readPL();
         data->x = accel.cx;
         data->y = accel.cy;
         data->z = accel.cz;
-        data->orientation = GyroscopeController::setOrientation();
+        data->orientationType = orientation;
+        data->isOk = orientation == LOCKOUT;
+        data->orientation = GyroscopeController::setOrientation(orientation);
     }
     else
     {
@@ -71,10 +74,9 @@ void GyroscopeController::setSensorData(GyroscopeData *data)
     }
 }
 
-String GyroscopeController::setOrientation()
+String GyroscopeController::setOrientation(byte orientation)
 {
-    byte pl = accel.readPL();
-    switch (pl)
+    switch (orientation)
     {
     case PORTRAIT_U:
         return "Portrait Up";
@@ -104,6 +106,14 @@ void GyroscopeController::printCalculatedAccels(GyroscopeData *data)
 // Check if all gyroscopes are in Flat position
 bool GyroscopeController::isOk()
 {
-    // TODO
-    return true;
+    return sensorA.isOk &&
+           sensorB.isOk &&
+           sensorC.isOk;
+}
+
+// alarm message for alarm notification
+String GyroscopeController::getAlarmMessage()
+{
+    String message = "";
+    return String(sensorA.isOk ? "" : "A") + String(sensorB.isOk ? "" : "B") + String(sensorC.isOk ? "" : "C");
 }

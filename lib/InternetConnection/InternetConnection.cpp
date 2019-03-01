@@ -26,6 +26,9 @@ bool alarmIsEnabled = true;
 #define SDA 21
 #define SCL 22
 
+// need lot of blynk virtual pins :)
+#define BLYNK_USE_128_VPINS
+
 // Synchronize settings from Blynk server with device when internet is connected
 BLYNK_CONNECTED()
 {
@@ -234,9 +237,7 @@ void InternetConnection::sendDataToBlynk(
         Blynk.virtualWrite(V13, meteoData.sensorC.temperature);
 
         // gyroscope data
-        Blynk.virtualWrite(V14, gyroscopeController.sensorA.orientation);
-        Blynk.virtualWrite(V15, gyroscopeController.sensorB.orientation);
-        Blynk.virtualWrite(V16, gyroscopeController.sensorC.orientation);
+        setGyroscopeControllerDataToBlynk(gyroscopeController);
 
         // I2C status - SDA
         // TODO: refactor..barvy kod atd...
@@ -264,11 +265,28 @@ void InternetConnection::sendDataToBlynk(
         Blynk.virtualWrite(V22, meteoData.sensorOutdoor.humidity);
         Blynk.virtualWrite(V23, meteoData.sensorOutdoor.temperature);
         Blynk.virtualWrite(V24, meteoData.sensorOutdoor.pressure);
+
+        // set alarm info
+        setAlarmInfoToBlynk();
     }
     else
     {
         Serial.println("Blynk is not connected");
     }
+}
+
+void InternetConnection::setGyroscopeControllerDataToBlynk(GyroscopeController gyroscopeController)
+{
+    Blynk.virtualWrite(V14, gyroscopeController.sensorA.orientation);
+    setAlarmCollor(V14, gyroscopeController.sensorA.isOk);
+
+    Blynk.virtualWrite(V15, gyroscopeController.sensorB.orientation);
+    setAlarmCollor(V15, gyroscopeController.sensorB.isOk);
+
+    Blynk.virtualWrite(V16, gyroscopeController.sensorC.orientation);
+    setAlarmCollor(V16, gyroscopeController.sensorC.isOk);
+
+    setAlarmInfoToBlynk();
 }
 
 void InternetConnection::setMagneticLockControllerDataToBlynk(MagneticLockController magneticLockController)
@@ -281,6 +299,8 @@ void InternetConnection::setMagneticLockControllerDataToBlynk(MagneticLockContro
 
     Blynk.virtualWrite(V21, magneticLockController.sensorC.status);
     setAlarmCollor(V21, magneticLockController.sensorC.locked);
+
+    setAlarmInfoToBlynk();
 }
 
 // Signal quality description http://m2msupport.net/m2msupport/atcsq-signal-quality/
@@ -317,6 +337,18 @@ void InternetConnection::getSignalQualityDescription(int virtualPin, int quality
 /// ALARM SECTION
 ////////////////////
 
+void InternetConnection::setAlarmInfoToBlynk()
+{
+    Blynk.virtualWrite(V32, isAlarm ? "AKTUÁLNÍ ALARM!" : "OK");
+    setAlarmCollor(V32, !isAlarm);
+
+    Blynk.virtualWrite(V33, alarmEnabledNotifications ? "Alarm notifikace zapnuty" : "Alarm notifikace vypnuty");
+    setAlarmCollor(V33, alarmEnabledNotifications);
+
+    Blynk.virtualWrite(V34, alarmIsEnabled ? "Alarm zapnut" : "Alarm vypnut");
+    setAlarmCollor(V34, alarmIsEnabled);
+}
+
 void InternetConnection::blynkRunIfAlarm()
 {
     if (alarmIsEnabled && isAlarm)
@@ -338,6 +370,14 @@ void InternetConnection::setMagneticLockControllerDataToBlynkIfAlarm(MagneticLoc
     }
 }
 
+void InternetConnection::setGyroscopeControllerDataToBlynkIfAlarm(GyroscopeController gyroscopeController)
+{
+    if (isAlarm)
+    {
+        setGyroscopeControllerDataToBlynk(gyroscopeController);
+    }
+}
+
 void InternetConnection::alarmMagneticController(MagneticLockController magneticLockController)
 {
     if (!alarmIsEnabled)
@@ -345,7 +385,6 @@ void InternetConnection::alarmMagneticController(MagneticLockController magnetic
         return;
     }
 
-    // TODO: mozna pridat moznost alarm uplne vypnout - dalsi tlacitko vedle notifikaci
     Serial.println("\n!!! Magnetic alarm !!!\n");
 
     if (!Blynk.connected())
@@ -360,6 +399,38 @@ void InternetConnection::alarmMagneticController(MagneticLockController magnetic
         if (alarmEnabledNotifications)
         {
             Blynk.notify("! ALARM ! Magnetický zámek je otevřen: " + magneticLockController.getAlarmMessage());
+        }
+    }
+    else
+    {
+        // TODO: No Blynk connection, try send SMS or call?
+        // res = modem.sendSMS(SMS_TARGET, String("Hello from ") + imei);
+        // res = modem.callNumber(CALL_TARGET);
+        Serial.println("ALARM but can't connected to Blynk");
+    }
+}
+
+void InternetConnection::alarmGyroscopeController(GyroscopeController gyroscopeController)
+{
+    if (!alarmIsEnabled)
+    {
+        return;
+    }
+
+    Serial.println("\n!!! Gyroscope alarm !!!\n");
+
+    if (!Blynk.connected())
+    {
+        initializeConnection();
+    }
+
+    if (Blynk.connected())
+    {
+        setGyroscopeControllerDataToBlynk(gyroscopeController);
+
+        if (alarmEnabledNotifications)
+        {
+            Blynk.notify("! ALARM ! Gyroskop není ve správné poloze: " + gyroscopeController.getAlarmMessage());
         }
     }
     else
