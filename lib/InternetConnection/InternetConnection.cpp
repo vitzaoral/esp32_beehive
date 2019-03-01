@@ -17,6 +17,9 @@ Settings settings;
 // alarm notifications are enabled
 bool alarmEnabledNotifications = true;
 
+// alarm is enabled
+bool alarmIsEnabled = true;
+
 // TODO: PIN for sleep/wake modem..unused - delete?
 #define DTR_PIN 3
 
@@ -75,6 +78,13 @@ BLYNK_WRITE(V30)
 {
     alarmEnabledNotifications = param.asInt();
     Serial.println("Alarm notifications was " + String(alarmEnabledNotifications ? "enabled" : "disabled"));
+}
+
+// Turn on/off alarm
+BLYNK_WRITE(V31)
+{
+    alarmIsEnabled = param.asInt();
+    Serial.println("Alarm was " + String(alarmIsEnabled ? "enabled" : "disabled"));
 }
 
 void InternetConnection::initialize()
@@ -309,7 +319,7 @@ void InternetConnection::getSignalQualityDescription(int virtualPin, int quality
 
 void InternetConnection::blynkRunIfAlarm()
 {
-    if (isAlarm)
+    if (alarmIsEnabled && isAlarm)
     {
         Blynk.run();
     }
@@ -330,6 +340,11 @@ void InternetConnection::setMagneticLockControllerDataToBlynkIfAlarm(MagneticLoc
 
 void InternetConnection::alarmMagneticController(MagneticLockController magneticLockController)
 {
+    if (!alarmIsEnabled)
+    {
+        return;
+    }
+
     // TODO: mozna pridat moznost alarm uplne vypnout - dalsi tlacitko vedle notifikaci
     Serial.println("\n!!! Magnetic alarm !!!\n");
 
