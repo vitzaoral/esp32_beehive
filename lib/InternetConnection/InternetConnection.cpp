@@ -239,24 +239,14 @@ void InternetConnection::sendDataToBlynk(
         // gyroscope data
         setGyroscopeControllerDataToBlynk(gyroscopeController);
 
-        // I2C status - SDA
-        // TODO: refactor..barvy kod atd...
-        if (!digitalRead(SDA))
-        {
-            Blynk.virtualWrite(V17, "SDA error");
-        }
-        else
-        {
-            Blynk.virtualWrite(V17, "SDA OK");
-        }
-        if (!digitalRead(SCL))
-        {
-            Blynk.virtualWrite(V18, "SCL error");
-        }
-        else
-        {
-            Blynk.virtualWrite(V18, "SCL OK");
-        }
+        // I2C status - SDA and SCL
+        bool SDAisOK = digitalRead(SDA);
+        bool SCLsOK = digitalRead(SCL);
+
+        Blynk.virtualWrite(V17, SDAisOK ? String("SDA OK") : String("SDA error"));
+        setAlarmCollor(V17, SDAisOK);
+        Blynk.virtualWrite(V18, SCLsOK ? String("SCL OK") : String("SCL error"));
+        setAlarmCollor(V18, SCLsOK);
 
         // magnetic locks data
         setMagneticLockControllerDataToBlynk(magneticLockController);
