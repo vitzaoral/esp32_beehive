@@ -347,6 +347,11 @@ void InternetConnection::setAlarmInfoToBlynk()
 
     Blynk.virtualWrite(V34, alarmIsEnabled ? "Alarm zapnut" : "Alarm vypnut");
     setAlarmCollor(V34, alarmIsEnabled);
+
+    if (isAlarm)
+    {
+        Serial.println("\n ALARM \n");
+    }
 }
 
 void InternetConnection::blynkRunIfAlarm()
