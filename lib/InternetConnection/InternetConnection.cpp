@@ -364,7 +364,7 @@ void InternetConnection::blynkRunIfAlarm()
 
 void InternetConnection::setAlarmCollor(int virtualPin, bool isOk)
 {
-    Blynk.setProperty(virtualPin, "color", String(isOk ? "#008000" : "ff0000"));
+    Blynk.setProperty(virtualPin, "color", String(isOk ? "#008000" : "#ff0000"));
 }
 
 void InternetConnection::setMagneticLockControllerDataToBlynkIfAlarm(MagneticLockController magneticLockController)
