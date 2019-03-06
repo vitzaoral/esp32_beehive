@@ -34,6 +34,7 @@ Ticker timerSendDataToBlynkIfAlarm(sendDataToBlynkIfAlarm, 20000); // 20 sec
 // TODO: sound level measuring
 // TODO: buzzer siren
 // TODO: mic switchinng
+// TODO: alarm when temperature/gyroscope sensor gives nan value
 
 void setup()
 {

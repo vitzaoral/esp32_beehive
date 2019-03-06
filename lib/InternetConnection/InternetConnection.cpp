@@ -173,7 +173,7 @@ bool InternetConnection::initializeConnection()
         // delay(100);
         // modem.sleepEnable(false);
         // digitalWrite(DTR_PIN, HIGH);
-        Blynk.begin(settings.blynkAuth, modem, "internet", "", "");
+        Blynk.begin(settings.blynkAuth, modem, settings.apn, "", "");
         return true;
     }
     else
