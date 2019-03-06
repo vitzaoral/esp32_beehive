@@ -10,6 +10,10 @@
 #define MICROPHONE_C_PIN 33
 
 #include <TinyGsmClient.h>
+#include <ArduinoHttpClient.h>
+#include <FS.h>
+#include <SPIFFS.h>
+#include <Update.h>
 #include <MeteoData.h>
 #include <PowerController.h>
 #include <GyroscopeController.h>
@@ -31,6 +35,7 @@ public:
   void blynkRunIfAlarm();
   void setMagneticLockControllerDataToBlynkIfAlarm(MagneticLockController);
   void setGyroscopeControllerDataToBlynkIfAlarm(GyroscopeController);
+  void checkNewVersionAndUpdate();
 
 private:
   void restartModem();
@@ -40,6 +45,10 @@ private:
   void getSignalQualityDescription(int, int);
   void processIncomingCall();
   void setAlarmCollor(int, bool);
+  void updateFirmware();
+  void printPercent(uint32_t, uint32_t);
+  void performUpdate(Stream &, size_t);
+  void updateFromFS();
 };
 
 #endif

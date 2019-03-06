@@ -22,7 +22,7 @@ void checkIncomingCall();
 void checkGyroscopeAlarm();
 void checkMagneticLockAlarm();
 
-Ticker timerSendDataToInternet(sendDataToInternet, 300000);  // 5 min
+Ticker timerSendDataToInternet(sendDataToInternet, 300000);   // 5 min 300000
 Ticker timerCheckIncomingCall(checkIncomingCall, 5123);      // 5 sec
 Ticker timerGyroscopeAlarm(checkGyroscopeAlarm, 5321);       // 5 sec
 Ticker timerMagneticLockAlarm(checkMagneticLockAlarm, 4321); // 4 sec
@@ -39,6 +39,19 @@ Ticker timerSendDataToBlynkIfAlarm(sendDataToBlynkIfAlarm, 20000); // 20 sec
 void setup()
 {
   Serial.begin(115200);
+
+  // prepare and format SPIFFS
+  Serial.println("Begin SPIFFS");
+  if (!SPIFFS.begin(true))
+  {
+    Serial.println("SPIFFS Mount Failed");
+    return;
+  }
+
+  Serial.println("Format SPIFFS");
+  SPIFFS.format();
+  Serial.println("Format SPIFFS done");
+
   connection.initialize();
 
   timerSendDataToInternet.start();
@@ -85,6 +98,10 @@ void sendDataToInternet()
 
     Serial.println("Sending data to Blynk");
     connection.sendDataToBlynk(meteoData, powerController, gyroscopeController, magneticLockController);
+
+    // check new firmware version
+    connection.checkNewVersionAndUpdate();
+
     connection.disconnect();
   }
   else

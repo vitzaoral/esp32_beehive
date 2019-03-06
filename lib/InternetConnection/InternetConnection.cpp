@@ -9,10 +9,24 @@
 // Hardware Serial - UART2
 HardwareSerial gsmSerial(2);
 
-// TODO: OTA over SIM800L https://github.com/vshymanskyy/TinyGSM/issues/133#issuecomment-372327106
-
-TinyGsm modem(gsmSerial);
 Settings settings;
+
+// variables for HTTP access
+TinyGsm modem(gsmSerial);
+// need second modem instance for http client
+TinyGsm modemHttpClient(gsmSerial);
+TinyGsmClient client(modemHttpClient);
+HttpClient http(client, settings.firmwareUrlBase, 80);
+
+// Attach virtual serial terminal
+WidgetTerminal terminal(V36);
+
+// OTA - firmware file name for OTA update on the SPIFFS
+const char firmwareFile[] = "/firmware.bin";
+// OTA - Number of milliseconds to wait without receiving any data before we give up
+const int otaNetworkTimeout = 30 * 1000;
+// OTA - Number of milliseconds to wait if no data is available before trying again
+const int otakNetworkDelay = 1000;
 
 // alarm notifications are enabled
 bool alarmEnabledNotifications = true;
@@ -187,6 +201,7 @@ void InternetConnection::disconnect()
 {
     if (modemReady)
     {
+        http.stop();
         Blynk.disconnect();
         modem.gprsDisconnect();
         // TODO: sleep?
@@ -258,6 +273,9 @@ void InternetConnection::sendDataToBlynk(
 
         // set alarm info
         setAlarmInfoToBlynk();
+
+        // set current firmware version
+        Blynk.virtualWrite(V35, settings.version);
     }
     else
     {
@@ -323,9 +341,9 @@ void InternetConnection::getSignalQualityDescription(int virtualPin, int quality
     Blynk.setProperty(virtualPin, "color", color);
 }
 
-////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 /// ALARM SECTION
-////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void InternetConnection::setAlarmInfoToBlynk()
 {
@@ -434,5 +452,216 @@ void InternetConnection::alarmGyroscopeController(GyroscopeController gyroscopeC
         // res = modem.sendSMS(SMS_TARGET, String("Hello from ") + imei);
         // res = modem.callNumber(CALL_TARGET);
         Serial.println("ALARM but can't connected to Blynk");
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// OTA SECTION
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void InternetConnection::checkNewVersionAndUpdate()
+{
+    if (!modem.isGprsConnected())
+    {
+        Serial.println("GPRS not connected!");
+        return;
+    }
+
+    int statusCode = 0;
+
+    String fwVersionURL = String(settings.firmwareFileName);
+    fwVersionURL.concat(String(settings.firmwareVersionFileNameExt));
+
+    Serial.println("Making GET request for firmware version from: " + fwVersionURL);
+    terminal.println("Making GET request for firmware version from: " + fwVersionURL);
+
+    statusCode = http.get(fwVersionURL);
+    if (statusCode == 0)
+    {
+        statusCode = http.responseStatusCode();
+        if (statusCode == 200)
+        {
+            String version = http.responseBody();
+            Serial.print("Version: ");
+            Serial.println(version);
+            if (String(settings.version) != version)
+            {
+                Serial.println("!!! START OTA UPDATE !!!");
+                updateFirmware();
+            }
+            else
+            {
+                Serial.println("Already on the latest version");
+            }
+        }
+        else
+        {
+            Serial.println("Failed verify version from server, status code: " + String(statusCode));
+        }
+    }
+    else
+    {
+        Serial.println("Failed verify version from server, status code: " + String(statusCode));
+    }
+}
+
+void InternetConnection::updateFirmware()
+{
+    String fwFileURL = String(settings.firmwareFileName);
+    fwFileURL.concat(String(settings.firmwareFileNameExt));
+
+    int statusCode = http.get(fwFileURL);
+    if (statusCode == 0)
+    {
+        statusCode = http.responseStatusCode();
+        if (statusCode == 200)
+        {
+            Serial.println("Getting new firmware file OK");
+
+            int contentLength = http.contentLength();
+            Serial.print("Content length is: ");
+            Serial.println(contentLength);
+
+            unsigned long timeoutStart = millis();
+            char c;
+            uint32_t readLength = 0;
+
+            printPercent(readLength, contentLength);
+
+            // create firmware file in SPIFFS
+            File file = SPIFFS.open(firmwareFile, FILE_APPEND);
+
+            // Whilst we haven't timed out & haven't reached the end of the body
+            while ((http.connected() || http.available()) &&
+                   (!http.endOfBodyReached()) &&
+                   ((millis() - timeoutStart) < otaNetworkTimeout))
+            {
+                if (http.available())
+                {
+                    c = http.read();
+                    if (!file.print(c))
+                    {
+                        Serial.println("Failed to append to firmware file!!");
+                    }
+
+                    readLength++;
+                    if (readLength % (contentLength / 13) == 0)
+                    {
+                        printPercent(readLength, contentLength);
+                    }
+
+                    // We read something, reset the timeout counter
+                    timeoutStart = millis();
+                }
+                else
+                {
+                    // We haven't got any data, so let's pause to allow some to arrive
+                    delay(otakNetworkDelay);
+                }
+            }
+
+            Serial.println("Download done, disconnect");
+            file.close();
+            http.stop();
+            Serial.println("Start update firmware");
+            updateFromFS();
+        }
+        else
+        {
+            Serial.print("Getting response failed: ");
+            Serial.println(statusCode);
+        }
+    }
+    else
+    {
+        Serial.print("Connect failed: ");
+        Serial.println(statusCode);
+    }
+}
+
+void InternetConnection::performUpdate(Stream &updateSource, size_t updateSize)
+{
+    if (Update.begin(updateSize))
+    {
+        size_t written = Update.writeStream(updateSource);
+        if (written == updateSize)
+        {
+            Serial.println("Ready for update: " + String(written) + " bits successfully");
+        }
+        else
+        {
+            Serial.println("Firmware file size mismatch : " + String(written) + "/" + String(updateSize) + ". Retry?");
+        }
+
+        if (Update.end())
+        {
+            Serial.println("OTA was done succesfully");
+            if (Update.isFinished())
+            {
+                Serial.println("OTA ended succesfully. Disconnect and restart ESP.");
+                disconnect();
+                ESP.restart();
+            }
+            else
+            {
+                Serial.println("Failed on the OTA process");
+            }
+        }
+        else
+        {
+            Serial.println("OTA Error #: " + String(Update.getError()));
+        }
+    }
+    else
+    {
+        Serial.println("OTA problem - can't begin update process");
+    }
+}
+
+void InternetConnection::updateFromFS()
+{
+    File updateBin = SPIFFS.open(firmwareFile);
+    if (updateBin)
+    {
+        if (updateBin.isDirectory())
+        {
+            Serial.println("Error, shouldn't be directory, expected file");
+            updateBin.close();
+            return;
+        }
+
+        size_t updateSize = updateBin.size();
+
+        if (updateSize > 0)
+        {
+            Serial.println("Start firmware update");
+            performUpdate(updateBin, updateSize);
+        }
+        else
+        {
+            Serial.println("Error, firmware file has zero size");
+        }
+
+        updateBin.close();
+        SPIFFS.remove(firmwareFile);
+    }
+    else
+    {
+        Serial.println("File with firmware update not found");
+    }
+}
+
+void InternetConnection::printPercent(uint32_t readLength, uint32_t contentLength)
+{
+    // If we know the total length
+    if (contentLength != -1)
+    {
+        Serial.print("\r ");
+        Serial.print((100.0 * readLength) / contentLength);
+        Serial.print('%');
+    }
+    else
+    {
+        Serial.println(readLength);
     }
 }
