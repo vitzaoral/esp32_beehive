@@ -36,6 +36,7 @@ public:
   void setMagneticLockControllerDataToBlynkIfAlarm(MagneticLockController);
   void setGyroscopeControllerDataToBlynkIfAlarm(GyroscopeController);
   void checkNewVersionAndUpdate();
+  void printlnToTerminal(String);
 
 private:
   void restartModem();
