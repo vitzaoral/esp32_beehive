@@ -22,7 +22,7 @@ void checkIncomingCall();
 void checkGyroscopeAlarm();
 void checkMagneticLockAlarm();
 
-Ticker timerSendDataToInternet(sendDataToInternet, 300000);   // 5 min 300000
+Ticker timerSendDataToInternet(sendDataToInternet, 300000);  // 5 min 300000
 Ticker timerCheckIncomingCall(checkIncomingCall, 5123);      // 5 sec
 Ticker timerGyroscopeAlarm(checkGyroscopeAlarm, 5321);       // 5 sec
 Ticker timerMagneticLockAlarm(checkMagneticLockAlarm, 4321); // 4 sec
@@ -98,10 +98,7 @@ void sendDataToInternet()
 
     Serial.println("Sending data to Blynk");
     connection.sendDataToBlynk(meteoData, powerController, gyroscopeController, magneticLockController);
-
-    // check new firmware version
     connection.checkNewVersionAndUpdate();
-
     connection.disconnect();
   }
   else

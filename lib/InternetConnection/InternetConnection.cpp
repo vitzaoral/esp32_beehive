@@ -34,6 +34,9 @@ bool alarmEnabledNotifications = true;
 // alarm is enabled
 bool alarmIsEnabled = true;
 
+// start OTA update process
+bool startOTA = false;
+
 // TODO: PIN for sleep/wake modem..unused - delete?
 #define DTR_PIN 3
 
@@ -107,16 +110,26 @@ BLYNK_WRITE(V31)
 // Terminal input
 BLYNK_WRITE(V36)
 {
-    if (String("clear") == param.asStr())
+    String valueFromTerminal = param.asStr();
+
+    if (String("clear") == valueFromTerminal)
     {
         terminal.clear();
         terminal.println("CLEARED");
+        terminal.flush();
     }
-    else
+    else if (String("update") == valueFromTerminal)
     {
-        terminal.println(String("unknown command: ") + param.asStr());
+        terminal.clear();
+        terminal.println("Start OTA enabled");
+        terminal.flush();
+        startOTA = true;
     }
-    terminal.flush();
+    else if (valueFromTerminal != "\n" || valueFromTerminal != "\r" || valueFromTerminal != "")
+    {
+        terminal.println(String("unknown command: ") + valueFromTerminal);
+        terminal.flush();
+    }
 }
 
 void InternetConnection::initialize()
@@ -476,6 +489,17 @@ void InternetConnection::alarmGyroscopeController(GyroscopeController gyroscopeC
 
 void InternetConnection::checkNewVersionAndUpdate()
 {
+    if (!startOTA)
+    {
+        return;
+    }
+    else
+    {
+        startOTA = false;
+    }
+
+    terminal.println("Start OTA, check GPRS");
+
     if (!modem.isGprsConnected())
     {
         Serial.println("GPRS not connected!");
@@ -487,7 +511,7 @@ void InternetConnection::checkNewVersionAndUpdate()
     String fwVersionURL = String(settings.firmwareFileName);
     fwVersionURL.concat(String(settings.firmwareVersionFileNameExt));
 
-    printlnToTerminal("Making GET request for firmware version from: " + fwVersionURL);
+    printlnToTerminal("GPRS OK, making GET request for firmware version");
 
     statusCode = http.get(fwVersionURL);
     if (statusCode == 0)
@@ -517,6 +541,10 @@ void InternetConnection::checkNewVersionAndUpdate()
     {
         printlnToTerminal("Failed verify version from server, status code: " + String(statusCode));
     }
+
+    printlnToTerminal("Restart after OTA, bye");
+    delay(1000);
+    ESP.restart();
 }
 
 void InternetConnection::updateFirmware()
