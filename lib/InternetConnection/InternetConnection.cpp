@@ -13,10 +13,6 @@ Settings settings;
 
 // variables for HTTP access
 TinyGsm modem(gsmSerial);
-// need second modem instance for http client
-TinyGsm modemHttpClient(gsmSerial);
-TinyGsmClient client(modemHttpClient);
-HttpClient http(client, settings.firmwareUrlBase, 80);
 
 // Attach Blynk virtual serial terminal
 WidgetTerminal terminal(V36);
@@ -153,7 +149,8 @@ void InternetConnection::initialize()
 void InternetConnection::restartModem()
 {
     Serial.println("Restarting modem");
-    if (!modem.init())
+
+    if (!modem.restart())
     {
         Serial.println("Modem FAILED");
         modemReady = false;
@@ -227,10 +224,8 @@ bool InternetConnection::initializeConnection()
 
 void InternetConnection::disconnect()
 {
-    if (modemReady)
+    if (modemReady && modem.isGprsConnected())
     {
-        http.stop();
-        Blynk.disconnect();
         modem.gprsDisconnect();
         // TODO: sleep?
         //modem.sleepEnable(true);
@@ -508,6 +503,11 @@ void InternetConnection::checkNewVersionAndUpdate()
 
     int statusCode = 0;
 
+    // need second modem instance for http client
+    TinyGsm modemHttpClient(gsmSerial);
+    TinyGsmClient client(modemHttpClient);
+    HttpClient http(client, settings.firmwareUrlBase, 80);
+
     String fwVersionURL = String(settings.firmwareFileName);
     fwVersionURL.concat(String(settings.firmwareVersionFileNameExt));
 
@@ -525,7 +525,7 @@ void InternetConnection::checkNewVersionAndUpdate()
             if (String(settings.version) != version)
             {
                 printlnToTerminal("!!! START OTA UPDATE !!!");
-                updateFirmware();
+                updateFirmware(http);
             }
             else
             {
@@ -547,7 +547,7 @@ void InternetConnection::checkNewVersionAndUpdate()
     ESP.restart();
 }
 
-void InternetConnection::updateFirmware()
+void InternetConnection::updateFirmware(HttpClient http)
 {
     String fwFileURL = String(settings.firmwareFileName);
     fwFileURL.concat(String(settings.firmwareFileNameExt));

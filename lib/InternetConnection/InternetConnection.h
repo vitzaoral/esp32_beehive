@@ -46,7 +46,7 @@ private:
   void getSignalQualityDescription(int, int);
   void processIncomingCall();
   void setAlarmCollor(int, bool);
-  void updateFirmware();
+  void updateFirmware(HttpClient);
   void printPercent(uint32_t, uint32_t);
   void performUpdate(Stream &, size_t);
   void updateFromFS();
