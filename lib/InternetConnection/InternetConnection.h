@@ -37,6 +37,7 @@ public:
   void setGyroscopeControllerDataToBlynkIfAlarm(GyroscopeController);
   void checkNewVersionAndUpdate();
   void printlnToTerminal(String);
+  void checkSirenAlarm();
 
 private:
   void restartModem();

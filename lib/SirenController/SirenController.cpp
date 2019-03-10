@@ -15,6 +15,13 @@ SirenController::SirenController()
     ledcAttachPin(BUZZER_PIN, LEDC_CHANNEL_0);
 }
 
+/// Turn siren on and off
+void SirenController::runSiren()
+{
+    sirenOn();
+    sirenOff();
+}
+
 void SirenController::sirenOn()
 {
     float sinVal;

@@ -17,6 +17,9 @@ TinyGsm modem(gsmSerial);
 // Attach Blynk virtual serial terminal
 WidgetTerminal terminal(V36);
 
+// Siren alarm controller
+SirenController sirenController;
+
 // OTA - firmware file name for OTA update on the SPIFFS
 const char firmwareFile[] = "/firmware.bin";
 // OTA - Number of milliseconds to wait without receiving any data before we give up
@@ -32,6 +35,9 @@ bool alarmIsEnabled = true;
 
 // start OTA update process
 bool startOTA = false;
+
+// if siren is turn on/off
+bool sirenAlarm = false;
 
 // TODO: PIN for sleep/wake modem..unused - delete?
 #define DTR_PIN 3
@@ -126,6 +132,13 @@ BLYNK_WRITE(V36)
         terminal.println(String("unknown command: ") + valueFromTerminal);
         terminal.flush();
     }
+}
+
+// Siren input
+BLYNK_WRITE(V37)
+{
+    sirenAlarm = param.asInt();
+    Serial.println("Siren was " + String(sirenAlarm ? "enabled" : "disabled"));
 }
 
 void InternetConnection::initialize()
@@ -235,6 +248,8 @@ void InternetConnection::disconnect()
     {
         Serial.println("Disconnected failed - modem wasn't ready");
     }
+    // turn onf siren alarm when disconnect
+    sirenAlarm = false;
 }
 
 void InternetConnection::sendDataToBlynk(
@@ -411,6 +426,15 @@ void InternetConnection::setGyroscopeControllerDataToBlynkIfAlarm(GyroscopeContr
     if (isAlarm)
     {
         setGyroscopeControllerDataToBlynk(gyroscopeController);
+    }
+}
+
+void InternetConnection::checkSirenAlarm()
+{
+    if (sirenAlarm)
+    {
+        sirenController.runSiren();
+        printlnToTerminal("Siréna spuštěna");
     }
 }
 

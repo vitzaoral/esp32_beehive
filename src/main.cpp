@@ -32,11 +32,10 @@ void sendDataToBlynkIfAlarm();
 Ticker timerSendDataToBlynkIfAlarm(sendDataToBlynkIfAlarm, 20000); // 20 sec
 
 // TODO: sound level measuring
-// TODO: buzzer siren
 // TODO: mic switchinng
-// TODO: alarm when gyroscope sensor gives nan value
 
 void setup()
+
 {
   Serial.begin(115200);
 
@@ -149,4 +148,5 @@ void sendDataToBlynkIfAlarm()
 {
   connection.setMagneticLockControllerDataToBlynkIfAlarm(magneticLockController);
   connection.setGyroscopeControllerDataToBlynkIfAlarm(gyroscopeController);
+  connection.checkSirenAlarm();
 }

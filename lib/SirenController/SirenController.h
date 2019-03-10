@@ -7,10 +7,12 @@
 
 class SirenController
 {
-  public:
-    SirenController();
-    void sirenOn();
-    void sirenOff();
+public:
+  SirenController();
+  void runSiren();
+private:
+  void sirenOn();
+  void sirenOff();
 };
 
 #endif
