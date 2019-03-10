@@ -71,6 +71,8 @@ void GyroscopeController::setSensorData(GyroscopeData *data)
     else
     {
         Serial.println("Gyroscope sensor not available!");
+        data->isOk = false;
+        data->orientation = "Not available!";
     }
 }
 
