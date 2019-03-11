@@ -237,8 +237,12 @@ bool InternetConnection::initializeConnection()
 
 void InternetConnection::disconnect()
 {
+    // turn onf siren alarm
+    sirenAlarm = false;
     if (modemReady && modem.isGprsConnected())
     {
+        // blynk turn off siren
+        Blynk.virtualWrite(V37, false);
         modem.gprsDisconnect();
         // TODO: sleep?
         //modem.sleepEnable(true);
@@ -248,8 +252,6 @@ void InternetConnection::disconnect()
     {
         Serial.println("Disconnected failed - modem wasn't ready");
     }
-    // turn onf siren alarm when disconnect
-    sirenAlarm = false;
 }
 
 void InternetConnection::sendDataToBlynk(
@@ -573,6 +575,18 @@ void InternetConnection::checkNewVersionAndUpdate()
 
 void InternetConnection::updateFirmware(HttpClient http)
 {
+    // prepare and format SPIFFS
+    printlnToTerminal("Begin SPIFFS");
+    if (!SPIFFS.begin(true))
+    {
+        printlnToTerminal("SPIFFS Mount Failed");
+        return;
+    }
+
+    printlnToTerminal("Format SPIFFS");
+    SPIFFS.format();
+    printlnToTerminal("Format SPIFFS done");
+
     String fwFileURL = String(settings.firmwareFileName);
     fwFileURL.concat(String(settings.firmwareFileNameExt));
 
@@ -661,9 +675,7 @@ void InternetConnection::performUpdate(Stream &updateSource, size_t updateSize)
             printlnToTerminal("OTA was done succesfully");
             if (Update.isFinished())
             {
-                printlnToTerminal("OTA ended succesfully. Disconnect and restart ESP.");
-                disconnect();
-                ESP.restart();
+                printlnToTerminal("OTA ended succesfully.");
             }
             else
             {
@@ -705,8 +717,11 @@ void InternetConnection::updateFromFS()
             printlnToTerminal("Error, firmware file has zero size");
         }
 
+        printlnToTerminal("Remove firmware file and restart ESP.");
         updateBin.close();
         SPIFFS.remove(firmwareFile);
+        disconnect();
+        ESP.restart();
     }
     else
     {
