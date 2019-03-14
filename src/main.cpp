@@ -21,9 +21,7 @@ void sendDataToInternet();
 void checkIncomingCall();
 void checkGyroscopeAlarm();
 void checkMagneticLockAlarm();
-void restartESP();
 
-Ticker timerRestartESP(restartESP, 14400000);                // 4 hours
 Ticker timerSendDataToInternet(sendDataToInternet, 300000);  // 5 min 300000
 Ticker timerCheckIncomingCall(checkIncomingCall, 5123);      // 5 sec
 Ticker timerGyroscopeAlarm(checkGyroscopeAlarm, 5321);       // 5 sec
@@ -47,7 +45,6 @@ void setup()
   timerGyroscopeAlarm.start();
   timerMagneticLockAlarm.start();
   timerSendDataToBlynkIfAlarm.start();
-  timerRestartESP.start();
 
   meteoData.initializeSensors();
 
@@ -66,7 +63,6 @@ void loop()
   timerGyroscopeAlarm.update();
   timerMagneticLockAlarm.update();
   timerSendDataToBlynkIfAlarm.update();
-  timerRestartESP.update();
 
   connection.blynkRunIfAlarm();
 }
@@ -140,10 +136,4 @@ void sendDataToBlynkIfAlarm()
   connection.setMagneticLockControllerDataToBlynkIfAlarm(magneticLockController);
   connection.setGyroscopeControllerDataToBlynkIfAlarm(gyroscopeController);
   connection.checkSirenAlarm();
-}
-
-void restartESP()
-{
-  Serial.println("** RESTARTING **");
-  ESP.restart();
 }

@@ -148,8 +148,8 @@ void InternetConnection::initialize()
     pinMode(MICROPHONE_B_PIN, OUTPUT);
     pinMode(MICROPHONE_C_PIN, OUTPUT);
 
-    // Set GSM module baud rate
-    gsmSerial.begin(115200, SERIAL_8N1, 16, 17, false);
+    pinMode(MODEM_RESET_PIN, OUTPUT);
+
     // TODO: sleep/wake upp https://www.raviyp.com/embedded/223-sim900-sim800-sleep-mode-at-commands
     // pinMode(DTR_PIN, OUTPUT);
     // digitalWrite(DTR_PIN, HIGH);
@@ -162,6 +162,18 @@ void InternetConnection::initialize()
 void InternetConnection::restartModem()
 {
     Serial.println("Restarting modem");
+    delay(1000);
+    digitalWrite(MODEM_RESET_PIN, HIGH);
+    delay(400);
+    digitalWrite(MODEM_RESET_PIN, LOW);
+    delay(400);
+
+    Serial.println("Restarting modem - initial serial, factory default");
+    // Set GSM module baud rate
+    gsmSerial.begin(115200, SERIAL_8N1, 16, 17, false);
+    modem.factoryDefault();
+
+    Serial.println("Restarting modem - doing restart");
 
     if (!modem.restart())
     {
@@ -172,6 +184,7 @@ void InternetConnection::restartModem()
     {
         Serial.println("Modem restart OK");
         modemReady = true;
+        Blynk.config(modem, settings.blynkAuth);
         Serial.println("Modem info: " + modem.getModemInfo());
     }
 }
@@ -217,22 +230,37 @@ void InternetConnection::processIncomingCall()
 
 bool InternetConnection::initializeConnection()
 {
-    Serial.println("Initialize Blynk connection");
-    if (modemReady)
+    bool result = false;
+
+    if (!modemReady)
+    {
+        Serial.println("Modem is not ready, can't start Blynk");
+    }
+
+    Serial.println("Initialize Blynk connection - modem ready, start connect to GPRS");
+
+    if (modemReady && modem.gprsConnect(settings.apn))
     {
         // TODO: wake up?
         // digitalWrite(DTR_PIN, LOW);
         // delay(100);
         // modem.sleepEnable(false);
         // digitalWrite(DTR_PIN, HIGH);
-        Blynk.begin(settings.blynkAuth, modem, settings.apn, "", "");
-        return true;
+        Serial.println("Initialize Blynk connection - modem gprs connect OK, start Blynk");
+        Blynk.connect();
+        Serial.println("Initialize Blynk connection - Blynk OK");
+        result = true;
     }
     else
     {
-        Serial.println("Modem is not ready, can't start Blynk");
-        return false;
+        Serial.println("Can't connect to GPRS");
     }
+
+    if (!result)
+    {
+        restartModem();
+    }
+    return result;
 }
 
 void InternetConnection::disconnect()

@@ -9,6 +9,9 @@
 #define MICROPHONE_B_PIN 32
 #define MICROPHONE_C_PIN 33
 
+// pin for modem hardware reset
+#define MODEM_RESET_PIN 2
+
 #include <TinyGsmClient.h>
 #include <ArduinoHttpClient.h>
 #include <FS.h>
