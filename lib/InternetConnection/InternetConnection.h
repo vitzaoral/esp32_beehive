@@ -54,6 +54,7 @@ private:
   void printPercent(uint32_t, uint32_t);
   void performUpdate(Stream &, size_t);
   void updateFromFS();
+  void setI2CStatusVersion();
 };
 
 #endif

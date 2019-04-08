@@ -265,12 +265,14 @@ bool InternetConnection::initializeConnection()
 
 void InternetConnection::disconnect()
 {
-    // turn onf siren alarm
-    sirenAlarm = false;
     if (modemReady && modem.isGprsConnected())
     {
         // blynk turn off siren
-        Blynk.virtualWrite(V37, false);
+        if (sirenAlarm)
+        {
+            Blynk.virtualWrite(V37, false);
+        }
+
         modem.gprsDisconnect();
         // TODO: sleep?
         //modem.sleepEnable(true);
@@ -280,6 +282,9 @@ void InternetConnection::disconnect()
     {
         Serial.println("Disconnected failed - modem wasn't ready");
     }
+
+    // turn off siren alarm
+    sirenAlarm = false;
 }
 
 void InternetConnection::sendDataToBlynk(
@@ -322,14 +327,8 @@ void InternetConnection::sendDataToBlynk(
         // gyroscope data
         setGyroscopeControllerDataToBlynk(gyroscopeController);
 
-        // I2C status - SDA and SCL
-        bool SDAisOK = digitalRead(SDA);
-        bool SCLsOK = digitalRead(SCL);
-
-        Blynk.virtualWrite(V17, SDAisOK ? String("SDA OK") : String("SDA error"));
-        setAlarmCollor(V17, SDAisOK);
-        Blynk.virtualWrite(V18, SCLsOK ? String("SCL OK") : String("SCL error"));
-        setAlarmCollor(V18, SCLsOK);
+        // set SDA/SCL status
+        setI2CStatusVersion();
 
         // magnetic locks data
         setMagneticLockControllerDataToBlynk(magneticLockController);
@@ -342,13 +341,25 @@ void InternetConnection::sendDataToBlynk(
         // set alarm info
         setAlarmInfoToBlynk();
 
-        // set current firmware version
-        Blynk.virtualWrite(V35, settings.version);
+        Serial.println("Sending data to Blynk - DONE");
     }
     else
     {
         Serial.println("Blynk is not connected");
     }
+}
+
+void InternetConnection::setI2CStatusVersion()
+{
+    // I2C status - SDA and SCL
+    bool SDAisOK = digitalRead(SDA);
+    bool SCLsOK = digitalRead(SCL);
+
+    String message = (SDAisOK ? String("SDA OK, ") : String("SDA error, ")) +
+     (SCLsOK ? String("SCL OK, ") : String("SCL error, ")) + 
+     String("Version: ") + settings.version;
+
+    Blynk.virtualWrite(V17, message);
 }
 
 void InternetConnection::setGyroscopeControllerDataToBlynk(GyroscopeController gyroscopeController)
@@ -406,7 +417,9 @@ void InternetConnection::getSignalQualityDescription(int virtualPin, int quality
         color = "#008000";
     }
     Blynk.virtualWrite(virtualPin, message);
-    Blynk.setProperty(virtualPin, "color", color);
+    
+    // increases the time to send data, commented out..
+    // Blynk.setProperty(virtualPin, "color", color);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -440,7 +453,8 @@ void InternetConnection::blynkRunIfAlarm()
 
 void InternetConnection::setAlarmCollor(int virtualPin, bool isOk)
 {
-    Blynk.setProperty(virtualPin, "color", String(isOk ? "#008000" : "#ff0000"));
+    // increases the time to send data, commented out..
+    // Blynk.setProperty(virtualPin, "color", String(isOk ? "#008000" : "#ff0000"));
 }
 
 void InternetConnection::setMagneticLockControllerDataToBlynkIfAlarm(MagneticLockController magneticLockController)
