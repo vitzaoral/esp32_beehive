@@ -207,22 +207,28 @@ void InternetConnection::checkIncomingCall()
 
 void InternetConnection::processIncomingCall()
 {
+    int callTime = 20000;
+    int pauseTime = 100;
+
     Serial.println("Microphone A on");
     digitalWrite(MICROPHONE_A_PIN, HIGH);
-    delay(5000);
+    delay(callTime);
     digitalWrite(MICROPHONE_A_PIN, LOW);
-    delay(1000);
+    // modem.dtmfSend('A', 1000);
+    // delay(pauseTime);
 
-    Serial.println("Microphone B on");
-    digitalWrite(MICROPHONE_B_PIN, HIGH);
-    delay(5000);
-    digitalWrite(MICROPHONE_B_PIN, LOW);
-    delay(1000);
+    // TODO: switching microphones
+    // Serial.println("Microphone B on");
+    // digitalWrite(MICROPHONE_B_PIN, HIGH);
+    // delay(60000);
+    // digitalWrite(MICROPHONE_B_PIN, LOW);
+    // modem.dtmfSend('A', 1000);
+    // delay(pauseTime);
 
-    Serial.println("Microphone C on");
-    digitalWrite(MICROPHONE_C_PIN, HIGH);
-    delay(5000);
-    digitalWrite(MICROPHONE_C_PIN, LOW);
+    // Serial.println("Microphone C on");
+    // digitalWrite(MICROPHONE_C_PIN, HIGH);
+    // delay(callTime);
+    // digitalWrite(MICROPHONE_C_PIN, LOW);
 
     Serial.println("*** BYE BYE ***");
     modem.callHangup();
@@ -356,8 +362,8 @@ void InternetConnection::setI2CStatusVersion()
     bool SCLsOK = digitalRead(SCL);
 
     String message = (SDAisOK ? String("SDA OK, ") : String("SDA error, ")) +
-     (SCLsOK ? String("SCL OK, ") : String("SCL error, ")) + 
-     String("Version: ") + settings.version;
+                     (SCLsOK ? String("SCL OK, ") : String("SCL error, ")) +
+                     String("Version: ") + settings.version;
 
     Blynk.virtualWrite(V17, message);
 }
@@ -411,13 +417,17 @@ void InternetConnection::getSignalQualityDescription(int virtualPin, int quality
         message = "dobrá";
         color = "#93bd38";
     }
-    else if (quality <= 30)
+    else if (quality < 25)
     {
         message = "výborná";
         color = "#008000";
     }
+    else {
+        message = "vynikající";
+        color = "#008000";
+    }
     Blynk.virtualWrite(virtualPin, message);
-    
+
     // increases the time to send data, commented out..
     // Blynk.setProperty(virtualPin, "color", color);
 }
@@ -631,6 +641,8 @@ void InternetConnection::updateFirmware(HttpClient http)
 
     String fwFileURL = String(settings.firmwareFileName);
     fwFileURL.concat(String(settings.firmwareFileNameExt));
+
+    printlnToTerminal("Download file from: " + fwFileURL);
 
     int statusCode = http.get(fwFileURL);
     if (statusCode == 0)
