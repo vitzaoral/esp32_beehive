@@ -589,7 +589,7 @@ void InternetConnection::checkNewVersionAndUpdate()
     String fwVersionURL = String(settings.firmwareFileName);
     fwVersionURL.concat(String(settings.firmwareVersionFileNameExt));
 
-    printlnToTerminal("GPRS OK, making GET request for firmware version");
+    Serial.println("GPRS OK, making GET request for firmware version");
 
     statusCode = http.get(fwVersionURL);
     if (statusCode == 0)
@@ -598,29 +598,29 @@ void InternetConnection::checkNewVersionAndUpdate()
         if (statusCode == 200)
         {
             String version = http.responseBody();
-            printlnToTerminal("Version: " + version);
+            Serial.println("Version: " + version);
 
             if (String(settings.version) != version)
             {
-                printlnToTerminal("!!! START OTA UPDATE !!!");
+                Serial.println("!!! START OTA UPDATE !!!");
                 updateFirmware(http);
             }
             else
             {
-                printlnToTerminal("Already on the latest version");
+                Serial.println("Already on the latest version");
             }
         }
         else
         {
-            printlnToTerminal("Failed verify version from server, status code: " + String(statusCode));
+            Serial.println("Failed verify version from server, status code: " + String(statusCode));
         }
     }
     else
     {
-        printlnToTerminal("Failed verify version from server, status code: " + String(statusCode));
+        Serial.println("Failed verify version from server, status code: " + String(statusCode));
     }
 
-    printlnToTerminal("Restart after OTA, bye");
+    Serial.println("Restart after OTA, bye");
     delay(1000);
     ESP.restart();
 }
@@ -628,21 +628,21 @@ void InternetConnection::checkNewVersionAndUpdate()
 void InternetConnection::updateFirmware(HttpClient http)
 {
     // prepare and format SPIFFS
-    printlnToTerminal("Begin SPIFFS");
+    Serial.println("Begin SPIFFS");
     if (!SPIFFS.begin(true))
     {
-        printlnToTerminal("SPIFFS Mount Failed");
+        Serial.println("SPIFFS Mount Failed");
         return;
     }
 
-    printlnToTerminal("Format SPIFFS");
+    Serial.println("Format SPIFFS");
     SPIFFS.format();
-    printlnToTerminal("Format SPIFFS done");
+    Serial.println("Format SPIFFS done");
 
     String fwFileURL = String(settings.firmwareFileName);
     fwFileURL.concat(String(settings.firmwareFileNameExt));
 
-    printlnToTerminal("Download file from: " + fwFileURL);
+    Serial.println("Download file from: " + fwFileURL);
 
     int statusCode = http.get(fwFileURL);
     if (statusCode == 0)
@@ -650,10 +650,10 @@ void InternetConnection::updateFirmware(HttpClient http)
         statusCode = http.responseStatusCode();
         if (statusCode == 200)
         {
-            printlnToTerminal("Getting new firmware file OK");
+            Serial.println("Getting new firmware file OK");
 
             int contentLength = http.contentLength();
-            printlnToTerminal("Content length is: " + String(contentLength));
+            Serial.println("Content length is: " + String(contentLength));
 
             unsigned long timeoutStart = millis();
             char c;
@@ -693,20 +693,20 @@ void InternetConnection::updateFirmware(HttpClient http)
                 }
             }
 
-            printlnToTerminal("Download done, disconnect");
+            Serial.println("Download done, disconnect");
             file.close();
             http.stop();
-            printlnToTerminal("Start update firmware");
+            Serial.println("Start update firmware");
             updateFromFS();
         }
         else
         {
-            printlnToTerminal("Getting response failed: " + String(statusCode));
+            Serial.println("Getting response failed: " + String(statusCode));
         }
     }
     else
     {
-        printlnToTerminal("Connect failed: " + String(statusCode));
+        Serial.println("Connect failed: " + String(statusCode));
     }
 }
 
@@ -717,33 +717,33 @@ void InternetConnection::performUpdate(Stream &updateSource, size_t updateSize)
         size_t written = Update.writeStream(updateSource);
         if (written == updateSize)
         {
-            printlnToTerminal("Ready for update: " + String(written) + " bits successfully");
+            Serial.println("Ready for update: " + String(written) + " bits successfully");
         }
         else
         {
-            printlnToTerminal("Firmware file size mismatch : " + String(written) + "/" + String(updateSize) + ". Retry?");
+            Serial.println("Firmware file size mismatch : " + String(written) + "/" + String(updateSize) + ". Retry?");
         }
 
         if (Update.end())
         {
-            printlnToTerminal("OTA was done succesfully");
+            Serial.println("OTA was done succesfully");
             if (Update.isFinished())
             {
-                printlnToTerminal("OTA ended succesfully.");
+                Serial.println("OTA ended succesfully.");
             }
             else
             {
-                printlnToTerminal("Failed on the OTA process");
+                Serial.println("Failed on the OTA process");
             }
         }
         else
         {
-            printlnToTerminal("OTA Error #: " + String(Update.getError()));
+            Serial.println("OTA Error #: " + String(Update.getError()));
         }
     }
     else
     {
-        printlnToTerminal("OTA problem - can't begin update process");
+        Serial.println("OTA problem - can't begin update process");
     }
 }
 
@@ -754,7 +754,7 @@ void InternetConnection::updateFromFS()
     {
         if (updateBin.isDirectory())
         {
-            printlnToTerminal("Error, shouldn't be directory, expected file");
+            Serial.println("Error, shouldn't be directory, expected file");
             updateBin.close();
             return;
         }
@@ -763,15 +763,15 @@ void InternetConnection::updateFromFS()
 
         if (updateSize > 0)
         {
-            printlnToTerminal("Start firmware update");
+            Serial.println("Start firmware update");
             performUpdate(updateBin, updateSize);
         }
         else
         {
-            printlnToTerminal("Error, firmware file has zero size");
+            Serial.println("Error, firmware file has zero size");
         }
 
-        printlnToTerminal("Remove firmware file and restart ESP.");
+        Serial.println("Remove firmware file and restart ESP.");
         updateBin.close();
         SPIFFS.remove(firmwareFile);
         disconnect();
@@ -779,7 +779,7 @@ void InternetConnection::updateFromFS()
     }
     else
     {
-        printlnToTerminal("File with firmware update not found");
+        Serial.println("File with firmware update not found");
     }
 }
 
@@ -788,11 +788,11 @@ void InternetConnection::printPercent(uint32_t readLength, uint32_t contentLengt
     // If we know the total length
     if (contentLength != -1)
     {
-        printlnToTerminal("\r " + String((100.0 * readLength) / contentLength) + "%");
+        Serial.println("\r " + String((100.0 * readLength) / contentLength) + "%");
     }
     else
     {
-        printlnToTerminal(String(readLength));
+        Serial.println(String(readLength));
     }
 }
 
