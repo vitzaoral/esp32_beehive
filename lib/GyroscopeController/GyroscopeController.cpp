@@ -89,7 +89,7 @@ String GyroscopeController::setOrientation(byte orientation)
     case LANDSCAPE_L:
         return "Landscape Left";
     case LOCKOUT:
-        return "Flat";
+        return "OK - Flat";
     }
     return "";
 }

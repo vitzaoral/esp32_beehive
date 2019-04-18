@@ -23,12 +23,12 @@ void MagneticLockController::setSensorData(LockData *data, int pin)
     {
         data->locked = true;
         data->status = "OK";
-        Serial.println("OK - locked");
+        Serial.println("OK");
     }
     else
     {
         data->locked = false;
-        data->status = "NEZAMČENO!";
+        data->status = "ALARM!";
         Serial.println("UNLOCKED!");
     }
 }
