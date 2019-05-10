@@ -207,8 +207,8 @@ void InternetConnection::checkIncomingCall()
 
 void InternetConnection::processIncomingCall()
 {
-    int callTime = 20000;
-    int pauseTime = 100;
+    int callTime = 30000;
+   // int pauseTime = 100;
 
     Serial.println("Microphone A on");
     digitalWrite(MICROPHONE_A_PIN, HIGH);

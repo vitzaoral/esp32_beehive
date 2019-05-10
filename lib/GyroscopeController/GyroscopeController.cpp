@@ -81,13 +81,13 @@ String GyroscopeController::setOrientation(byte orientation)
     switch (orientation)
     {
     case PORTRAIT_U:
-        return "Portrait Up";
+        return "Portrait Up!";
     case PORTRAIT_D:
-        return "Portrait Down";
+        return "Portrait Down!";
     case LANDSCAPE_R:
-        return "Landscape Right";
+        return "Landscape Right!";
     case LANDSCAPE_L:
-        return "Landscape Left";
+        return "Landscape Left!";
     case LOCKOUT:
         return "OK - Flat";
     }
