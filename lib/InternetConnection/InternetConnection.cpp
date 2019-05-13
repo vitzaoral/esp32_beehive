@@ -28,10 +28,10 @@ const int otaNetworkTimeout = 30 * 1000;
 const int otakNetworkDelay = 1000;
 
 // alarm notifications are enabled
-bool alarmEnabledNotifications = true;
+bool alarmEnabledNotifications = false;
 
 // alarm is enabled
-bool alarmIsEnabled = true;
+bool alarmIsEnabled = false;
 
 // start OTA update process
 bool startOTA = false;
@@ -44,6 +44,9 @@ bool sirenAlarm = false;
 
 #define SDA 21
 #define SCL 22
+
+// after 20 attempts of modem restart, restart ESP
+#define MAX_MODEM_RESTART_COUNT 10
 
 // need lot of blynk virtual pins :)
 #define BLYNK_USE_128_VPINS
@@ -157,10 +160,21 @@ void InternetConnection::initialize()
 
     // true if is actual alarm - run Blynk.run
     isAlarm = false;
+    modemRestartsCount = 0;
 }
 
 void InternetConnection::restartModem()
 {
+    Serial.println("Number of modem restart: " + String(modemRestartsCount));
+    if (modemRestartsCount >= MAX_MODEM_RESTART_COUNT)
+    {
+        Serial.println("Attemp max level of modem restart, restart ESP.");
+        modemRestartsCount = 0;
+        ESP.restart();
+    } else {
+        modemRestartsCount++;
+    }
+
     Serial.println("Restarting modem");
     delay(1000);
     digitalWrite(MODEM_RESET_PIN, HIGH);
@@ -201,14 +215,14 @@ void InternetConnection::checkIncomingCall()
     }
     else
     {
-        restartModem();
+        Serial.println("Incomming call - modem not ready");
     }
 }
 
 void InternetConnection::processIncomingCall()
 {
     int callTime = 30000;
-   // int pauseTime = 100;
+    // int pauseTime = 100;
 
     Serial.println("Microphone A on");
     digitalWrite(MICROPHONE_A_PIN, HIGH);
@@ -422,7 +436,8 @@ void InternetConnection::getSignalQualityDescription(int virtualPin, int quality
         message = "výborná";
         color = "#008000";
     }
-    else {
+    else
+    {
         message = "vynikající";
         color = "#008000";
     }

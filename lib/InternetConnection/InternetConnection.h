@@ -43,6 +43,7 @@ public:
   void checkSirenAlarm();
 
 private:
+  int modemRestartsCount;
   void restartModem();
   void setMagneticLockControllerDataToBlynk(MagneticLockController);
   void setGyroscopeControllerDataToBlynk(GyroscopeController);

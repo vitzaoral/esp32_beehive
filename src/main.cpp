@@ -2,6 +2,8 @@
 #include <InternetConnection.h>
 #include <Ticker.h>
 
+// funkcni verze TinyGSM 0.3.6
+
 // cervenby S09 start 13.2. v 21:30 - 14.2. 23:30 - 26 hodin
 // DD0503MA start 15.2. 7:30 - 16.2. 13:45 - 30 hodin
 // 403MA start 18.2. 7:30 - 19.2. 11:45 - 28 hodin
