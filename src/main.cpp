@@ -2,7 +2,7 @@
 #include <InternetConnection.h>
 #include <Ticker.h>
 
-// funkcni verze TinyGSM 0.3.6
+// funkcni verze TinyGSM 0.3.6, 0.6.2 delala bordel
 
 // cervenby S09 start 13.2. v 21:30 - 14.2. 23:30 - 26 hodin
 // DD0503MA start 15.2. 7:30 - 16.2. 13:45 - 30 hodin
@@ -25,7 +25,7 @@ void checkGyroscopeAlarm();
 void checkMagneticLockAlarm();
 
 Ticker timerSendDataToInternet(sendDataToInternet, 300000);  // 5 min 300000
-Ticker timerCheckIncomingCall(checkIncomingCall, 5123);      // 5 sec
+Ticker timerCheckIncomingCall(checkIncomingCall, 5125);      // 5 sec
 Ticker timerGyroscopeAlarm(checkGyroscopeAlarm, 5321);       // 5 sec
 Ticker timerMagneticLockAlarm(checkMagneticLockAlarm, 4321); // 4 sec
 
@@ -85,6 +85,7 @@ void sendDataToInternet()
     // gyroscope and magnetic locks data are set in other timer more often, so we have actual data
 
     Serial.println("Sending data to Blynk");
+    connection.setMicrophoneGain();
     connection.sendDataToBlynk(meteoData, powerController, gyroscopeController, magneticLockController);
     connection.checkNewVersionAndUpdate();
     connection.disconnect();

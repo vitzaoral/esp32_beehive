@@ -29,9 +29,10 @@ void GyroscopeController::initializeSensors()
 
 void GyroscopeController::setData()
 {
+    int pause = 300;
     digitalWrite(GYROSCOPE_A_PIN, LOW);
     accel.init();
-    delay(100);
+    delay(pause);
     Serial.print("Gyroscope A: ");
     setSensorData(&sensorA);
     printCalculatedAccels(&sensorA);
@@ -39,7 +40,7 @@ void GyroscopeController::setData()
 
     digitalWrite(GYROSCOPE_B_PIN, LOW);
     accel.init();
-    delay(100);
+    delay(pause);
     Serial.print("Gyroscope B: ");
     setSensorData(&sensorB);
     printCalculatedAccels(&sensorB);
@@ -47,7 +48,7 @@ void GyroscopeController::setData()
 
     digitalWrite(GYROSCOPE_C_PIN, LOW);
     accel.init();
-    delay(100);
+    delay(pause);
     Serial.print("Gyroscope C: ");
     setSensorData(&sensorC);
     printCalculatedAccels(&sensorC);

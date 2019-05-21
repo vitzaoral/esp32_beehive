@@ -41,6 +41,7 @@ public:
   void checkNewVersionAndUpdate();
   void printlnToTerminal(String);
   void checkSirenAlarm();
+  void setMicrophoneGain();
 
 private:
   int modemRestartsCount;

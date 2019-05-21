@@ -39,6 +39,9 @@ bool startOTA = false;
 // if siren is turn on/off
 bool sirenAlarm = false;
 
+// microphone gain
+int microphoneGain = 0;
+
 // TODO: PIN for sleep/wake modem..unused - delete?
 #define DTR_PIN 3
 
@@ -142,6 +145,12 @@ BLYNK_WRITE(V37)
 {
     sirenAlarm = param.asInt();
     Serial.println("Siren was " + String(sirenAlarm ? "enabled" : "disabled"));
+}
+
+// Microphone gain
+BLYNK_WRITE(V38)
+{
+    microphoneGain = param.asInt();
 }
 
 void InternetConnection::initialize()
@@ -817,4 +826,11 @@ void InternetConnection::printlnToTerminal(String message)
     Serial.println(message);
     terminal.println(message);
     terminal.flush();
+}
+
+void InternetConnection::setMicrophoneGain() {
+    if (modemReady) {
+        // https://github.com/sui77/rotary-sim800/wiki/SW_ATCommands#atcmic---microphone-gain-setting
+        modem.sendAT(GF("+CMIC=0,"), microphoneGain);
+    }
 }
